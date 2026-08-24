@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Subjects{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+
+{% block content %}
+<style>
+.subject-card {
+    border: none;
+    border-radius: 16px;
+    transition: all .3s ease;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+}
+.subject-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.12);
+}
+.badge-teacher {
+    background: #e7f1ff;
+    color: #2563eb;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.badge-unassigned {
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+</style>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-book text-primary"></i> Subjects</h2>
+        <p class="text-muted mb-0">{{ subjects.count }} Subjects in Total</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'academics:subject_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Subject
+        </a>
+        <button class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- STATS CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card subject-card text-center">
+            <div class="card-body">
+                <h4 class="fw-bold">{{ subjects.count }}</h4>
+                <small class="text-muted">Total Subjects</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card subject-card text-center">
+            <div class="card-body">
+                <h4 class="fw-bold text-success">{{ assigned_count }}</h4>
+                <small class="text-muted">Assigned to Teacher</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card subject-card text-center">
+            <div class="card-body">
+                <h4 class="fw-bold text-warning">{{ unassigned_count }}</h4>
+                <small class="text-muted">Unassigned</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUBJECTS TABLE -->
+<div class="card subject-card">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-ul text-primary"></i> Subject List</span>
+    </div>
+    <div class="card-body">
+        {% if subjects %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Subject Name</th>
+                        <th>Class</th>
+                        <th>Teacher</th>
+                        <th class="text-end" style="width: 140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for s in subjects %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="fw-semibold">
+                        <i class="bi bi-book text-primary me-1"></i> {{ s.name }}
+                    </td>
+                    <td>
+                        <a href="{% url 'academics:class_dashboard' s.class_room.id %}" class="text-decoration-none">
+                            <span class="badge bg-light text-dark border">{{ s.class_room }}</span>
+                        </a>
+                    </td>
+                    <td>
+                        {% if s.teacher %}
+                            <a href="{% url 'academics:teacher_detail' s.teacher.pk %}" class="badge-teacher text-decoration-none">
+                                <i class="bi bi-person-badge"></i> {{ s.teacher.first_name }} {{ s.teacher.last_name }}
+                            </a>
+                        {% else %}
+                            <span class="badge-unassigned"><i class="bi bi-exclamation-triangle"></i> Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'academics:subject_update' s.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'academics:subject_delete' s.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-book fs-1 text-muted d-block mb-3"></i>
+            <h5>No subjects yet</h5>
+            <p class="text-muted">Start by creating subjects for each class</p>
+            <a href="{% url 'academics:subject_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Add First Subject
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}

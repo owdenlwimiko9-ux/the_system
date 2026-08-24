@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Assign Subject to {{ teacher.first_name }}{% endblock %}
+{% block page_title %}Assign Subject{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">
+                Assign Subject to: {{ teacher.first_name }} {{ teacher.last_name }}
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Select Subject</label>
+                        <select name="subject" class="form-select" required>
+                            <option value="">-- Choose Subject --</option>
+                            {% for sub in subjects %}
+                                <option value="{{ sub.id }}">{{ sub.name }} - {{ sub.class_room }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Only shows subjects that don't have a teacher yet</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg"></i> Assign Subject
+                    </button>
+                </form>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-check-circle fs-1 text-success"></i>
+                        <p class="mt-2">All subjects already have teachers assigned</p>
+                        <a href="{% url 'academics:subject_create' %}" class="btn btn-outline-primary btn-sm">Create New Subject</a>
+                    </div>
+                {% endif %}
+
+                <a href="{% url 'academics:teacher_detail' teacher.pk %}" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-arrow-left"></i> Back to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

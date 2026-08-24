@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-book"></i> {{ title }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Subject Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Class</label>
+                        {{ form.class_room }}
+                        {% if form.class_room.errors %}<div class="text-danger small">{{ form.class_room.errors }}</div>{% endif %}
+                        <small class="text-muted">Which class will take this subject</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Teacher - Optional</label>
+                        {{ form.teacher }}
+                        {% if form.teacher.errors %}<div class="text-danger small">{{ form.teacher.errors }}</div>{% endif %}
+                        <small class="text-muted">You can assign later from teacher profile</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg"></i> Save Subject
+                    </button>
+                </form>
+                <a href="{% url 'academics:subject_list' %}" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-arrow-left"></i> Back to Subjects
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

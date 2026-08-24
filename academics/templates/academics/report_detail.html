@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Report Card - {{ report.student.full_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .stat-card {
+        border-radius: 12px;
+        border: none;
+        transition: transform .2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    }
+    .grade-badge {
+        font-size: 1.1rem;
+        padding: 8px 16px;
+        border-radius: 50px;
+    }
+    .table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .progress-link {
+        color: #667eea;
+        font-weight: 600;
+    }
+    .progress-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header + Print -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <h3 class="fw-bold"><i class="bi bi-journal-check text-primary"></i> Student Report Card</h3>
+        <button onclick="window.print()" class="btn btn-primary shadow"><i class="bi bi-printer"></i> Print Report</button>
+    </div>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+            
+            <!-- School Banner -->
+            <div class="report-header text-center p-4 mb-4">
+                <h3 class="fw-bold mb-1"><i class="bi bi-mortarboard"></i> SCHOOL SYSTEM</h3>
+                <p class="mb-0">{{ academic_year.name }} | {{ report.exam.name }}</p>
+            </div>
+
+            <!-- Student Info Card -->
+            <div class="card stat-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-2"><i class="bi bi-person-fill text-primary"></i> <strong>Name:</strong> {{ report.student.full_name }}</p>
+                            <p class="mb-2"><i class="bi bi-people-fill text-primary"></i> <strong>Class:</strong> {{ report.student.class_room }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-2"><i class="bi bi-hash text-primary"></i> <strong>Adm No:</strong> {{ report.student.admission_number }}</p>
+                            <p class="mb-2"><i class="bi bi-people text-primary"></i> <strong>Total Students:</strong> {{ report.total_students }}</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-primary">Academic Year: {{ academic_year.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 Dashboard Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="card stat-card text-center p-3">
+                        <i class="bi bi-journal-text fs-2 text-primary"></i>
+                        <small class="text-muted">Total Marks</small>
+                        <h4 class="fw-bold">{{ report.total_marks|floatformat:2 }}</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card stat-card text-center p-3">
+                        <i class="bi bi-graph-up-arrow fs-2 text-success"></i>
+                        <small class="text-muted">Average</small>
+                        <h4 class="fw-bold text-success">{{ report.average_marks|floatformat:2 }}%</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card stat-card text-center p-3">
+                        <i class="bi bi-trophy-fill fs-2 text-warning"></i>
+                        <small class="text-muted">Position</small>
+                        <h4 class="fw-bold text-warning">{{ report.position }} / {{ report.total_students }}</h4>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card stat-card text-center p-3">
+                        <i class="bi bi-award-fill fs-2 text-info"></i>
+                        <small class="text-muted">Performance</small>
+                        {% if report.student.class_room.level_group == 'PRE_PRIMARY' %}
+                            {% with avg=report.average_marks %}
+                                {% if avg >= 75 %}<span class="badge bg-success grade-badge">Grade: A</span>
+                                {% elif avg >= 65 %}<span class="badge bg-primary grade-badge">Grade: B</span>
+                                {% elif avg >= 45 %}<span class="badge bg-info grade-badge">Grade: C</span>
+                                {% elif avg >= 30 %}<span class="badge bg-warning grade-badge">Grade: D</span>
+                                {% else %}<span class="badge bg-danger grade-badge">Grade: F</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <h5 class="fw-bold">Pts: {{ report.division_points|floatformat:0 }}</h5>
+                            <span class="badge bg-info grade-badge">{{ report.division }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Table -->
+            <h6 class="fw-bold mt-4 mb-3"><i class="bi bi-arrow-up-circle text-primary"></i> Progress This Year</h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Exam</th><th>Total</th><th>Average</th><th>Position</th>
+                            {% if report.student.class_room.level_group == 'PRE_PRIMARY' %}<th>Grade</th>
+                            {% else %}<th>Points</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for progress in progress_data %}
+                        <tr {% if progress.id == report.id %}class="table-primary"{% endif %}>
+                            <td><a href="{% url 'academics:report_detail' progress.id %}" class="progress-link">{{ progress.exam.name }}</a></td>
+                            <td>{{ progress.total_marks|floatformat:2 }}</td>
+                            <td>{{ progress.average_marks|floatformat:2 }}%</td>
+                            <td>{{ progress.position }} / {{ progress.total_students }}</td>
+                            {% if report.student.class_room.level_group == 'PRE_PRIMARY' %}
+                                {% with avg=progress.average_marks %}
+                                    {% if avg >= 75 %}<td><span class="badge bg-success">A</span></td>
+                                    {% elif avg >= 65 %}<td><span class="badge bg-primary">B</span></td>
+                                    {% elif avg >= 45 %}<td><span class="badge bg-info">C</span></td>
+                                    {% elif avg >= 30 %}<td><span class="badge bg-warning">D</span></td>
+                                    {% else %}<td><span class="badge bg-danger">F</span></td>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <td><span class="badge bg-secondary">Pts: {{ progress.division_points|floatformat:0 }}</span> {{ progress.division }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Subject Breakdown -->
+            <h6 class="fw-bold mt-4 mb-3"><i class="bi bi-book text-primary"></i> Subject Breakdown - {{ report.exam.name }}</h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Subject</th><th>Test</th><th>Exam</th><th>Total</th><th>Avg</th>
+                            <th>Grade</th>
+                            {% if report.student.class_room.level_group in 'ORDINARY,ADVANCED' %}<th>Points</th>{% endif %}
+                            <th>Pos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in breakdown %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="fw-semibold">{{ b.subject.name }}</td>
+                            <td>{{ b.test_marks|floatformat:2 }}</td>
+                            <td>{{ b.exam_marks|floatformat:2 }}</td>
+                            <td>{{ b.total_marks|floatformat:2 }}</td>
+                            <td>{{ b.average_marks|floatformat:2 }}</td>
+                            
+                            {# GRADE COLUMN #}
+                            <td>
+                                {% if report.student.class_room.level_group in 'ORDINARY,ADVANCED' %}
+                                    {# A/O Level: Grade from Points #}
+                                    {% with pts=b.points %}
+                                        {% if pts == 1 %}<span class="badge bg-success">A</span>
+                                        {% elif pts == 2 %}<span class="badge bg-primary">B</span>
+                                        {% elif pts == 3 %}<span class="badge bg-info">C</span>
+                                        {% elif pts == 4 %}<span class="badge bg-warning text-dark">D</span>
+                                        {% else %}<span class="badge bg-danger">F</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    {# PRIMARY: Grade from Average #}
+                                    {% with avg=b.average_marks %}
+                                        {% if avg >= 75 %}<span class="badge bg-success">A</span>
+                                        {% elif avg >= 65 %}<span class="badge bg-primary">B</span>
+                                        {% elif avg >= 45 %}<span class="badge bg-info">C</span>
+                                        {% elif avg >= 30 %}<span class="badge bg-warning text-dark">D</span>
+                                        {% else %}<span class="badge bg-danger">F</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            </td>
+
+                            {# POINTS COLUMN - ONLY FOR A/O LEVEL #}
+                            {% if report.student.class_room.level_group in 'ORDINARY,ADVANCED' %}
+                                <td><span class="badge bg-dark">Pts: {{ b.points }}</span></td>
+                            {% endif %}
+                            
+                            <td>{{ b.position }} / {{ report.total_students }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Remarks -->
+            <div class="card stat-card mt-4">
+                <div class="card-body">
+                    <p><i class="bi bi-chat-left-text text-primary"></i> <strong>Class Teacher Remark:</strong> {{ report.teacher_remark|default:"-" }}</p>
+                    <p><i class="bi bi-chat-square-text text-primary"></i> <strong>Head Teacher Remark:</strong> {{ report.head_teacher_remark|default:"-" }}</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    .table thead { background: #667eea !important; -webkit-print-color-adjust: exact; }
+}
+</style>
+{% endblock %}

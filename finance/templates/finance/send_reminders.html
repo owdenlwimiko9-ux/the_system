@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Send Fee Reminders{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold"><i class="bi bi-whatsapp text-success"></i> Send Fee Reminders</h2>
+
+        {% if bills %}
+        <!-- BULK SEND BUTTON - CHANGED TEXT -->
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="bulk_send" value="1">
+            <input type="hidden" name="status" value="{{ status }}">
+            <input type="hidden" name="class" value="{{ selected_class }}">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-whatsapp"></i> Prepare All {{ bills|length }}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <p class="text-muted">We group by guardian. 1 click = all kids of that parent in 1 message.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4 card p-3 shadow-sm">
+        <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="unpaid" {% if status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                <option value="partial" {% if status == 'partial' %}selected{% endif %}>Partial</option>
+                <option value="overdue" {% if status == 'overdue' %}selected{% endif %}>Overdue</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Class</label>
+            <select name="class" class="form-select">
+                <option value="">All Classes</option>
+                {% for c in classes %}
+                <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filter</button>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Term</th>
+                            <th>Balance</th>
+                            <th>Due Date</th>
+                            <th>Control No</th>
+                            <th>Guardian</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bill in bills %}
+                        <tr {% if bill.id in reminded_today_ids %}class="table-info"{% endif %}>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ bill.student.full_name|title }}</td>
+                            <td>{{ bill.student.class_room }}</td>
+                            <td>{{ bill.fee_structure.term }}</td>
+                            <td class="fw-bold text-danger">TZS {{ bill.balance|intcomma }}</td>
+                            <td>{{ bill.due_date|date:"d M Y"|default:"Not Set" }}</td>
+                            <td><code>{{ bill.bank_control_number|default:"Pending" }}</code></td>
+                            <td>
+                                {% if bill.student.guardian %}
+                                    {{ bill.student.guardian.first_name|title }} {{ bill.student.guardian.last_name|title }}<br>
+                                    <small class="text-muted">{{ bill.student.guardian.phone|default:"No Phone" }}</small>
+                                {% else %}
+                                    <span class="text-muted">No Guardian</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if bill.id in reminded_today_ids %}
+                                    <span class="badge bg-info me-1">Reminded Today</span>
+                                {% endif %}
+
+                                {% if bill.student.guardian and bill.student.guardian.phone %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="bill_id" value="{{ bill.id }}">
+                                    <button type="submit" class="btn btn-sm btn-success">
+                                        <i class="bi bi-whatsapp"></i> Send
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-secondary">No Phone</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9" class="text-center py-4 text-muted">No bills found for this filter</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Total: {{ bills|length }} bills
+        </div>
+    </div>
+</div>
+
+<!-- REPLACED: Auto open tabs with Modal that works -->
+{% if bulk_messages %}
+<div class="modal fade show" style="display:block; background:rgba(0,0,0,0.6)" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="bi bi-whatsapp"></i> {{ bulk_messages|length }} Messages Ready</h5>
+        <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+      </div>
+      <div class="modal-body">
+        <p>Click "Open WhatsApp" for each parent. It sends all their kids in 1 message.</p>
+        <div style="max-height:400px; overflow-y:auto;">
+        <table class="table table-sm">
+            <thead><tr><th>#</th><th>Parent</th><th>Phone</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for m in bulk_messages %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ m.name }}</td>
+                <td><code>{{ m.phone }}</code></td>
+                <td><a href="{{ m.link }}" target="_blank" class="btn btn-sm btn-success">Open WhatsApp</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

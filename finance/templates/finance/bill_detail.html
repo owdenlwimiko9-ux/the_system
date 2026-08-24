@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Bill Detail{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4>Bill for {{ bill.student.full_name }}</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Class:</strong> {{ bill.student.class_room.level }} {{ bill.student.class_room.stream }}</p>
+                <p><strong>Term:</strong> {{ bill.fee_structure.term }} {{ bill.fee_structure.academic_year }}</p>
+                <p><strong>Amount Due:</strong> TSh {{ bill.amount_due|floatformat:0 }}</p>
+                <p><strong>Amount Paid:</strong> TSh {{ bill.amount_paid|floatformat:0 }}</p>
+                <p><strong>Balance:</strong> <span class="text-danger fw-bold">TSh {{ bill.balance|floatformat:0 }}</span></p>
+                <p><strong>Due Date:</strong> {{ bill.due_date|date:"d M Y" }}</p>
+                <p><strong>Control Number:</strong> <code>{{ bill.control_number }}</code></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if bill.balance > 0 %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5><i class="bi bi-cash-coin"></i> Record Payment</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Amount to Pay</label>
+                        <input type="number" name="amount" class="form-control" max="{{ bill.balance }}" step="100" required>
+                        <small class="text-muted">Max: TSh {{ bill.balance|floatformat:0 }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="payment_method" class="form-select">
+                            <option>Cash</option>
+                            <option>NMB Bank</option>
+                            <option>Mobile Money</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Record Payment</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-success">This bill is fully paid ✅</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

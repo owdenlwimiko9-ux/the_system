@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Result Sheet - {{ class_room }}</title>
+    <style>
+        @page { size: A4 landscape; margin: 8mm; }
+        body { 
+            font-family: 'Calibri', Arial, sans-serif; 
+            font-size: 10px; /* BIGGER */
+            color: #000; 
+            margin: 0;
+        }
+        
+        .sheet-header { text-align: center; margin-bottom: 10px; border-bottom: 2px solid #dc3545; padding-bottom: 6px; }
+        .sheet-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: #dc3545; text-transform: uppercase; }
+        .sheet-header h4 { margin: 3px 0 0 0; font-size: 12px; font-weight: 600; }
+        
+        .result-table { width: 100%; border-collapse: collapse; font-size: 9.5px; } /* BIGGER */
+        .result-table thead th {
+            background: #dc3545; color: white; padding: 5px 3px; text-align: center;
+            font-weight: 700; border: 1px solid #b02a37;
+        }
+        .result-table tbody td {
+            padding: 4px 3px; border: 1px solid #999; vertical-align: middle; text-align: center;
+        }
+        .result-table tbody tr:nth-child(even) { background: #f5f5f5; }
+        
+        .col-no { width: 3%; }
+        .col-adm { width: 10%; text-align: left; }
+        .col-name { width: 18%; text-align: left; }
+        .col-g { width: 3%; }
+        .col-sub { width: 4%; } 
+        .col-grade { width: 7%; }
+        
+        .grade-A, .div-1 { color: #198754; font-weight: 700; }
+        .grade-B, .div-2 { color: #0d6efd; font-weight: 700; }
+        .grade-C, .div-3 { color: #fd7e14; font-weight: 700; }
+        .grade-D, .div-4 { color: #b8860b; font-weight: 700; }
+        .grade-F, .div-0 { color: #dc3545; font-weight: 700; }
+        
+        .footer { margin-top: 10px; font-size: 9px; color: #555; display: flex; justify-content: space-between; }
+        
+        .print-btn { position: fixed; top: 10px; right: 10px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        @media print {
+            .print-btn { display: none; }
+            body { font-size: 9px; }
+            .result-table thead th { background: #dc3545 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-btn">🖨️ Print</button>
+
+    <div class="sheet-header">
+        <h3>{{ school_name }}</h3>
+        <h4>{{ class_room }} - {{ exam.name }} {{ exam.academic_year }}</h4>
+    </div>
+
+    <table class="result-table">
+        <thead>
+            <tr>
+                <th class="col-no">POSITION IN CLASS</th>
+                <th class="col-adm">ADM NO</th>
+                <th class="col-name">STUDENT NAME</th>
+                <th class="col-g">G</th>
+                {% for sub in result_data.0.subjects %}
+                <th class="col-sub" title="{{ sub.subject.name }}">{{ sub.subject.short_name|default:sub.subject.name|upper|slice:":4" }}</th>
+                {% endfor %}
+                <th class="col-grade">{% if level_group in 'ORDINARY,ADVANCED' %}DIV-PTS{% else %}GRADE{% endif %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in result_data %}
+            <tr>
+                <td class="col-no">{{ forloop.counter }}</td>
+                <td class="col-adm">{{ data.student.admission_number }}</td>
+                <td class="col-name">{{ data.student.first_name }} {{ data.student.last_name|title }}</td>
+                <td class="col-g">{{ data.student.gender|first|upper }}</td>
+                
+                {% for res in data.subjects %}
+                    {% with grade=res.grade %}
+                    <td class="col-sub grade-{{ grade }}">{{ grade }}</td>
+                    {% endwith %}
+                {% endfor %}
+
+                <td class="col-grade">
+                    {% if level_group in 'ORDINARY,ADVANCED' %}
+                        {% if data.report.division %}
+                            <span class="div-{{ data.report.division }}">D{{ data.report.division }}-{{ data.report.division_points }}</span>
+                        {% else %}-{% endif %}
+                    {% else %}
+                        {% if data.report.average_marks >= 75 %}<span class="grade-A">A</span>
+                        {% elif data.report.average_marks >= 65 %}<span class="grade-B">B</span>
+                        {% elif data.report.average_marks >= 45 %}<span class="grade-C">C</span>
+                        {% elif data.report.average_marks >= 30 %}<span class="grade-D">D</span>
+                        {% else %}<span class="grade-F">F</span>{% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <span><b>Total Students:</b> {{ result_data|length }}</span>
+        <span><b>Printed:</b> {% now "d/m/Y H:i" %}</span>
+    </div>
+</body>
+</html>

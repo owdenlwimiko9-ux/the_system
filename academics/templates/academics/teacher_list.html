@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Teachers{% endblock %}
+{% block page_title %}Teachers{% endblock %}
+
+{% block content %}
+<style>
+.teacher-card {
+    border: none;
+    border-radius: 16px;
+    transition: all .3s ease;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+}
+.teacher-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+}
+.teacher-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+.badge-role {
+    background: #e7f1ff;
+    color: #2563eb;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.stat-pill {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: .8rem;
+}
+</style>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-person-badge text-primary"></i> Teachers</h2>
+        <p class="text-muted mb-0">{{ teachers.count }} Teaching Staff</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'academics:teacher_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Teacher
+        </a>
+        <button class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- STATS CARDS - SCHOOL TOTALS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="fw-bold">{{ teachers.count }}</h4>
+                <small class="text-muted">Total Teachers</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="fw-bold text-success">{{ teachers.count }}</h4>
+                <small class="text-muted">Active</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="fw-bold text-primary">{{ subjects_count }}</h4>
+                <small class="text-muted">Subjects in School</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="fw-bold text-warning">{{ classes_count }}</h4>
+                <small class="text-muted">Classes in School</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TEACHERS GRID -->
+{% if teachers %}
+<div class="row g-4">
+    {% for t in teachers %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="card teacher-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if t.photo %}
+                        <img src="{{ t.photo.url }}" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                    {% else %}
+                        <div class="teacher-avatar me-3">
+                            {{ t.first_name|first|upper }}{{ t.last_name|first|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ t.first_name }} {{ t.last_name }}</h6>
+                        <span class="badge-role"><i class="bi bi-person-check"></i> Teacher</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i> {{ t.email|default:"No email" }}</small>
+                    <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i> {{ t.phone|default:"No phone" }}</small>
+                </div>
+
+                <!-- PER TEACHER STATS -->
+                <div class="d-flex gap-2 mb-3">
+                    <div class="stat-pill w-50 text-center">
+                        <strong>{{ t.subject_count }}</strong>
+                        <small class="d-block text-muted">Subjects</small>
+                    </div>
+                    <div class="stat-pill w-50 text-center">
+                        <strong>{{ t.classroom_count }}</strong>
+                        <small class="d-block text-muted">Classes</small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'academics:teacher_detail' t.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <a href="{% url 'academics:teacher_update' t.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card shadow-sm border-0">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-person-x fs-1 text-muted d-block mb-3"></i>
+        <h5>No teachers yet</h5>
+        <p class="text-muted">Start by adding teachers to your school system</p>
+        <a href="{% url 'academics:teacher_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add First Teacher
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Bulk Upload Students{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-arrow-up"></i> Bulk Upload Students</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- STEP 1: DOWNLOAD TEMPLATE -->
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Step 1: Download Template</h5>
+                        <p>Download the Excel template, fill in student details, then upload it back here.</p>
+                        <a href="{% url 'students:download_student_template' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Download Excel Template
+                        </a>
+                    </div>
+
+                    <hr>
+
+                    <!-- STEP 2: UPLOAD -->
+                    <h5 class="alert-heading">Step 2: Upload Filled File</h5>
+                    <ul class="small text-muted">
+                        <li><b>gender</b>: M or F</li>
+                        <li><b>date_of_birth</b>: Format YYYY-MM-DD e.g. 2010-05-12</li>
+                        <li><b>class_room</b>: Use format Level+Stream. Examples: `Form 1A`, `Form 2A`, `Grade 3A`, `Baby A`. System will auto-map to F1, G1, BABY</li>
+                        <li><b>status</b>: ACTIVE, TRANSFERRED, GRADUATED</li>
+                        <li>If <b>guardian_phone</b> already exists, we will link to that guardian. If not, new guardian will be created</li>
+                        <li><b>admission_number</b> will be auto-generated. Don't include it in the file</li>
+                    </ul>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Select Excel or CSV File</label>
+                            {{ form.file }}
+                        </div>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-upload"></i> Upload Students</button>
+                        <a href="{% url 'students:student_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+
+                    {% if messages %}
+                        <div class="mt-3">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { size: A4; margin: 1.5cm; }
+        body { font-family: "Arial", sans-serif; font-size: 10pt; color: #000; }
+        .header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .header h1 { margin: 0; font-size: 16pt; text-transform: uppercase; }
+        .header h2 { margin: 2px 0; font-size: 12pt; }
+        .header p { margin: 2px 0; font-size: 9pt; }
+        
+        .student-info { width: 100%; margin-bottom: 15px; }
+        .student-info td { padding: 3px; }
+        .label { font-weight: bold; width: 20%; }
+
+        .results-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .results-table th, .results-table td { border: 1px solid #000; padding: 5px; text-align: center; }
+        .results-table th { background-color: #f0f0f0; font-weight: bold; }
+        .results-table .subject { text-align: left; }
+
+        .summary { width: 100%; margin-bottom: 15px; }
+        .summary td { padding: 5px; border: 1px solid #000; }
+        .summary .total-row { font-weight: bold; background-color: #f0f0f0; }
+
+        .remarks { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .remarks td { border: 1px solid #000; padding: 8px; height: 40px; vertical-align: top; }
+
+        .signatures { width: 100%; margin-top: 30px; }
+        .signatures td { width: 50%; padding-top: 30px; border-top: 1px solid #000; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>YOUR SCHOOL NAME HERE</h1>
+        <h2>STUDENT ACADEMIC REPORT</h2>
+        <p>P.O Box 123, Dar es Salaam | Tel: 07XX XXX</p>
+    </div>
+
+    <!-- STUDENT INFO -->
+    <table class="student-info">
+        <tr>
+            <td class="label">Name:</td>
+            <td>{{ report.student.full_name|upper }}</td>
+            <td class="label">Academic Year:</td>
+            <td>{{ report.academic_year.name }}</td>
+        </tr>
+        <tr>
+            <td class="label">Class:</td>
+            <td>{{ report.student.class_room }}</td>
+            <td class="label">Term:</td>
+            <td>{{ report.exam.term.get_name_display }}</td>
+        </tr>
+        <tr>
+            <td class="label">Admission No:</td>
+            <td>{{ report.student.admission_number }}</td>
+            <td class="label">Exam:</td>
+            <td>{{ report.exam.name }}</td>
+        </tr>
+    </table>
+
+    <!-- RESULTS TABLE -->
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>SUBJECT</th>
+                <th>TEST</th>
+                <th>EXAM</th>
+                <th>TOTAL</th>
+                <th>AVG</th>
+                <th>GRADE</th>
+                <th>POS</th>
+                <th>REMARK</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in subject_results %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="subject">{{ result.subject.name|upper }}</td>
+                <td>{{ result.test_marks }}</td>
+                <td>{{ result.exam_marks }}</td>
+                <td>{{ result.total_marks }}</td>
+                <td>{{ result.average_marks }}</td>
+                <td>{{ result.grade }}</td>
+                <td>{{ result.position }}</td>
+                <td>{{ result.remark }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- SUMMARY -->
+    <table class="summary">
+        <tr class="total-row">
+            <td>GRAND TOTAL</td>
+            <td>{{ report.total_marks }}</td>
+            <td>OVERALL AVERAGE</td>
+            <td>{{ report.average_marks }}%</td>
+        </tr>
+        <tr>
+            <td>CLASS POSITION</td>
+            <td>{{ report.class_position }} out of {{ report.total_students }}</td>
+            <td>TEACHER'S REMARK</td>
+            <td>{{ report.teacher_remark }}</td>
+        </tr>
+    </table>
+
+    <!-- REMARKS -->
+    <table class="remarks">
+        <tr>
+            <td><b>Class Teacher's Comment:</b><br>{{ report.teacher_remark }}</td>
+        </tr>
+        <tr>
+            <td><b>Head Teacher's Comment:</b><br>{{ report.head_teacher_remark }}</td>
+        </tr>
+    </table>
+
+    <!-- SIGNATURES -->
+    <table class="signatures">
+        <tr>
+            <td>Class Teacher's Signature: ............................</td>
+            <td>Date: ............................</td>
+        </tr>
+        <tr>
+            <td>Head Teacher's Signature: ............................</td>
+            <td>Date: ............................</td>
+        </tr>
+    </table>
+
+</body>
+</html>

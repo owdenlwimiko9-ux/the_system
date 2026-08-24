@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Generate Bills{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4><i class="bi bi-receipt"></i> Generate Bills for Class</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Select Fee Structure</label>
+                    <select name="fee_structure" class="form-select" required>
+                        <option value="">-- Choose Fee Structure --</option>
+                        {% for fs in fee_structures %}
+                        <option value="{{ fs.id }}">
+                            {{ fs.student_class }} - {{ fs.term }} {{ fs.academic_year }} - TSh {{ fs.amount|floatformat:0 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">This determines the class and amount</small>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Stream <span class="text-muted">(Optional)</span></label>
+                    <select name="stream" class="form-select">
+                        <option value="">All Streams</option>
+                        {% for code, name in streams %}
+                        <option value="{{ code }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Leave blank to bill all streams</small>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 
+                Bills will be created for all students in the selected class/stream. 
+                Existing bills will be updated with the new amount.
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Generate Bills
+            </button>
+            <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

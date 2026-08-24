@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Print Reports - {{ class_name }} - {{ exam.name }}{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        .page-break { page-break-after: always; }
+        body { font-size: 12px; }
+    }
+    .report-card { border: 2px solid #000; padding: 20px; margin-bottom: 20px; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between mb-3 no-print">
+        <h3>Bulk Print: {{ class_name }} - {{ exam.name }}</h3>
+        <button onclick="window.print()" class="btn btn-primary">Print All</button>
+    </div>
+
+    {% for data in reports_data %}
+    <div class="report-card {% if not forloop.last %}page-break{% endif %}">
+        <div class="text-center mb-3">
+            <h4 class="fw-bold">STUDENT REPORT CARD</h4>
+            <h6>Academic Year: {{ academic_year.name }} | {{ exam.name }}</h6>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-6">
+                <p><strong>Class:</strong> {{ class_name }}</p>
+                <p><strong>Name:</strong> {{ data.student.full_name }}</p>
+                <p><strong>Adm No:</strong> {{ data.student.admission_number }}</p>
+            </div>
+            <div class="col-6">
+                <p><strong>Gender:</strong> {{ data.student.gender }}</p>
+                <p><strong>Total Students:</strong> {{ data.report.total_students }}</p>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="row text-center mb-3">
+            <div class="col-3 border p-2">
+                <small>Total Marks</small>
+                <h5>{{ data.report.total_marks|floatformat:1 }}</h5>
+            </div>
+            <div class="col-3 border p-2">
+                <small>Average</small>
+                <h5>{{ data.report.average_marks|floatformat:1 }}%</h5>
+            </div>
+            <div class="col-3 border p-2">
+                <small>Position</small>
+                <h5>{{ data.report.class_position }} / {{ data.report.total_students }}</h5>
+            </div>
+            <div class="col-3 border p-2">
+                <small>Performance</small>
+                {% if class_room.level_group == 'PRE_PRIMARY' %}
+                    <h5>{{ data.report.grade }}</h5>
+                {% else %}
+                    <!-- FIX: Show Points and Division for O/A Level -->
+                    <h5>Pts: {{ data.report.division_points|floatformat:0 }}</h5>
+                    <span class="badge bg-info text-dark">{{ data.report.division }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subject Breakdown -->
+        <h6 class="fw-bold mt-3">Subject Performance</h6>
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>#</th><th>Subject</th><th>Test</th><th>Exam</th><th>Total</th><th>Avg%</th>
+                    {% if class_room.level_group != 'PRE_PRIMARY' %}
+                        <th>Points</th>
+                    {% else %}
+                        <th>Grade</th>
+                    {% endif %}
+                    <th>Pos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in data.breakdown %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ b.subject.name }}</td>
+                    <td>{{ b.test_marks|floatformat:0 }}</td>
+                    <td>{{ b.exam_marks|floatformat:0 }}</td>
+                    <td>{{ b.total_marks|floatformat:0 }}</td>
+                    <td>{{ b.average_marks|floatformat:0 }}</td>
+                    {% if class_room.level_group != 'PRE_PRIMARY' %}
+                        <td>{{ b.points }}</td>
+                    {% else %}
+                        <td>{{ b.grade }}</td>
+                    {% endif %}
+                    <td>{{ b.position }} / {{ data.report.total_students }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mt-3">
+            <p><strong>Class Teacher Remark:</strong> {{ data.report.teacher_remark }}</p>
+            <p><strong>Head Teacher Remark:</strong> {{ data.report.head_teacher_remark|default:"-" }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

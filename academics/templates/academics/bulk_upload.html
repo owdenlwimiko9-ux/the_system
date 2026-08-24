@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Bulk Upload - {{ exam.name }}{% endblock %}
+{% block content %}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-upload"></i> Bulk Upload Results: {{ exam.name }}</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Class:</strong> {{ exam.class_room }}</p>
+        <p><strong>Subjects:</strong> {% for s in subjects %}<span class="badge bg-secondary me-1">{{ s.name }}</span>{% endfor %}</p>
+        <hr>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Upload Excel File</label>
+                <input type="file" name="excel_file" class="form-control" accept=".xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-success"><i class="bi bi-cloud-upload"></i> Upload Results</button>
+            <a href="{% url 'academics:class_dashboard' exam.class_room.id %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

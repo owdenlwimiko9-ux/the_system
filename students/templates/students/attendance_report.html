@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Report - {{ student.full_name }}{% endblock %}
+{% block page_title %}Attendance Report{% endblock %}
+
+{% block content %}
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">{{ student.full_name|title }}</h2>
+        <p class="text-muted mb-0">
+            <i class="bi bi-building"></i> {{ student.class_room|default:"No Class" }} | 
+            <i class="bi bi-card-text"></i> {{ student.admission_number }}
+        </p>
+    </div>
+    <a href="{% url 'students:student_detail' student.pk %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Student
+    </a>
+</div>
+
+<!-- STATS CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ total }}</h4>
+                <small class="text-muted">Total Days</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm bg-success text-white h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ present }}</h4>
+                <small>Present</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm bg-danger text-white h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ absent }}</h4>
+                <small>Absent</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm bg-warning h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ late }}</h4>
+                <small>Late</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm bg-info text-white h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ excused }}</h4>
+                <small>Excused</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="card text-center border-0 shadow-sm bg-primary text-white h-100">
+            <div class="card-body py-3">
+                <h4 class="fw-bold mb-0">{{ percentage }}%</h4>
+                <small>Present %</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ATTENDANCE TABLE -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-bold">
+        <i class="bi bi-calendar-check"></i> Attendance History
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 120px;">Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance %}
+                    <tr>
+                        <td class="fw-semibold">{{ record.date|date:"d M Y" }}</td>
+                        <td>
+                            {% if record.status == 'P' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Present</span>
+                            {% elif record.status == 'A' %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Absent</span>
+                            {% elif record.status == 'L' %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Late</span>
+                            {% elif record.status == 'E' %}
+                                <span class="badge bg-info"><i class="bi bi-info-circle"></i> Excused</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.remarks|default:"-" }}</td>
+                        <td>{{ record.recorded_by.get_full_name|default:"System" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            No attendance records yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}School System{% endblock %}</title>
+    
+    <!-- Bootstrap 5.3 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --sidebar-bg: #0c152d; /* Dark blue like your navbar */
+            --sidebar-active: #2563eb;
+            --primary: #2563eb;
+            --bg-light: #f5f7fb;
+        }
+
+        body { 
+            background: var(--bg-light);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Login page gets gradient */
+        .login-body { 
+            background: linear-gradient(135deg, var(--primary) 0%, #1f3167 100%); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--sidebar-bg);
+            color: #fff;
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.85);
+            padding: 11px 20px;
+            margin: 2px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all .2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: var(--sidebar-active);
+            color: #fff;
+        }
+        .sidebar .nav-link i { 
+            width: 24px;
+            margin-right: 8px;
+        }
+        .sidebar .section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            padding: 15px 20px 5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 260px;
+            transition: all 0.3s;
+        }
+        /* TOPBAR */
+        .topbar {
+            background: #fff;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+
+        /* MOBILE */
+        @media (max-width: 992px) {
+            .sidebar { margin-left: -260px; }
+            .sidebar.show { margin-left: 0; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="{% if not user.is_authenticated %}login-body{% endif %}">
+
+{% if user.is_authenticated %}
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+    <div class="brand">
+        <i class="bi bi-mortarboard-fill text-warning"></i> SCHOOL SYSTEM
+    </div>
+
+    {% if user.is_superuser or user.role == 'admin' %}
+        <div class="section-title">Workspace</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:home' %}"><i class="bi bi-house"></i> Home</a></li>
+        </ul>
+
+        <div class="section-title">People</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{% url 'students:student_list' %}"><i class="bi bi-people"></i> Students</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'academics:class_list' %}"><i class="bi bi-building"></i> Academics</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'students:daily_attendance_summary' %}"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:account_manage' %}"><i class="bi bi-receipt"></i> Accounts</a></li>
+        </ul>
+
+        <div class="section-title">Operations</div>
+        <ul class="nav flex-column">
+            
+            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots"></i> Communications</a></li>
+        </ul>
+
+        <div class="section-title">Finance</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:dashboard' %}"><i class="bi bi-cash-coin"></i> Finance</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:send_reminders' %}"><i class="bi bi-whatsapp text-success"></i> Send Reminders</a></li>
+            
+        </ul>
+
+    {% elif user.role == 'accountant' %}
+        <div class="section-title">Finance</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:dashboard' %}"><i class="bi bi-cash-coin"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:unpaid_bills_list' %}"><i class="bi bi-list-ul"></i> Unpaid Bills</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:send_reminders' %}"><i class="bi bi-whatsapp text-success"></i> Send Reminders</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:generate_bills' %}"><i class="bi bi-file-earmark-plus"></i> Generate Bills</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:upload_bank_controls' %}"><i class="bi bi-upload"></i> Upload Controls</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'finance:import_bank_report' %}"><i class="bi bi-arrow-down-circle"></i> Import Bank</a></li>
+        </ul>
+
+    {% elif user.role == 'teacher' %}
+        <div class="section-title">Workspace</div>
+        <ul class="nav flex-column">
+            
+            <li class="nav-item"><a class="nav-link" href="{% url 'academics:class_list' %}"><i class="bi bi-building"></i> Academics</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'students:daily_attendance_summary' %}"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'students:student_list' %}"><i class="bi bi-people"></i> Students</a></li>
+        </ul>
+
+    {% elif user.role == 'parent' %}
+        <div class="section-title">Parent Portal</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{% url 'students:my_children' %}"><i class="bi bi-people"></i> My Children</a></li>
+       
+        </ul>
+    {% endif %}
+
+    <div class="section-title">System</div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}" class="px-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <!-- TOPBAR -->
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-secondary d-lg-none me-2" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                <i class="bi bi-list"></i>
+            </button>
+            <h4 class="mb-0 fw-bold">{% block page_title %}Dashboard{% endblock %}</h4>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted">
+                <i class="bi bi-person-circle"></i> {{ user.username|title }} 
+                <span class="badge bg-primary">{{ user.role|title }}</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="p-4">
+{% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+    </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

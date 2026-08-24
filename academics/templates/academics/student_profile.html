@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <!-- STUDENT HEADER -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" class="rounded-circle me-4" width="120" height="120" alt="{{ student.full_name }}">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ student.full_name }}&size=120&background=0D8ABC&color=fff" class="rounded-circle me-4" alt="No Photo">
+            {% endif %}
+            <div>
+                <h2>{{ student.full_name|upper }}</h2>
+                <p><b>Admission No:</b> {{ student.admission_number }} | <b>Class:</b> {{ student.class_room }}</p>
+                <p><b>Gender:</b> {{ student.gender }} | <b>DOB:</b> {{ student.dob }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECENT RESULTS -->
+    {% if latest_report %}
+    <h3 class="mb-3">Recent Results: {{ latest_report.exam.name }} - {{ latest_report.academic_year.name }}</h3>
+    <div class="card mb-4">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Subject</th><th>Test</th><th>Exam</th><th>Total</th><th>Avg</th><th>Grade</th><th>Pos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in latest_subjects %}
+                    <tr>
+                        <td>{{ s.subject.name }}</td>
+                        <td>{{ s.test_marks }}</td>
+                        <td>{{ s.exam_marks }}</td>
+                        <td>{{ s.total_marks }}</td>
+                        <td>{{ s.average_marks }}</td>
+                        <td>{{ s.grade }}</td>
+                        <td>{{ s.position }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p><b>Grand Total:</b> {{ latest_report.total_marks }} |
+               <b>Average:</b> {{ latest_report.average_marks }}% |
+               <b>Class Position:</b> {{ latest_report.class_position }}/{{ latest_report.total_students }}</p>
+            <a href="{% url 'academics:report_pdf' latest_report.pk %}" class="btn btn-danger btn-sm" target="_blank">Download PDF</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- OLD RESULTS / ACADEMIC HISTORY -->
+    <h3 class="mb-3">Academic History</h3>
+    {% for year, year_reports in reports_by_year.items %}
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5>{{ year }}</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                    <tr><th>Term</th><th>Total</th><th>Average</th><th>Position</th><th>Grade</th><th>PDF</th></tr>
+                </thead>
+                <tbody>
+                    {% for r in year_reports %}
+                    <tr>
+                        <td>{{ r.exam.term.get_name_display }}</td>
+                        <td>{{ r.total_marks }}</td>
+                        <td>{{ r.average_marks }}%</td>
+                        <td>{{ r.class_position }}</td>
+                        <td>{{ r.overall_grade }}</td>
+                        <td><a href="{% url 'academics:report_pdf' r.pk %}" target="_blank" class="btn btn-sm btn-outline-danger">PDF</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% empty %}
+    <p>No results found for this student.</p>
+    {% endfor %}
+
+    <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}

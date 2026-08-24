@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Kuweka Alama: {{ exam.name }} - {{ class_room }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Mwanafunzi</th>
+                    {% for subject in subjects %}
+                        <th colspan="2" class="text-center">{{ subject.name }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th></th>
+                    {% for subject in subjects %}
+                        <th>Test</th>
+                        <th>Exam</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ forloop.counter }}. {{ student.first_name }} {{ student.last_name }}</td>
+                    {% for subject in subjects %}
+                        <td><input type="number" name="test_{{ student.id }}_{{ subject.id }}" class="form-control" step="0.01" value="0"></td>
+                        <td><input type="number" name="exam_{{ student.id }}_{{ subject.id }}" class="form-control" step="0.01" value="0"></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">Hifadhi Alama Zote</button>
+        <a href="{% url 'class_detail' class_room.id %}" class="btn btn-secondary">Ghairi</a>
+    </form>
+</div>
+{% endblock %}

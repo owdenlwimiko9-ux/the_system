@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Step 2: Upload Bank Control Numbers</h4>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">
+            1. First <a href="{% url 'finance:download_template' %}">Download Template</a> and send to Bank<br>
+            2. Upload the CSV file back here with filled `Bank_ControlNumber` column
+        </p>
+        
+        <p><strong>Bills waiting for control:</strong> {{ pending_controls }}</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Upload CSV from Bank</label>
+                <input type="file" name="control_file" class="form-control" accept=".csv" required>
+                <small>Required columns: <code>AdmissionNo, Amount, Bank_ControlNumber</code></small>
+            </div>
+            <button type="submit" class="btn btn-success">Assign Control Numbers</button>
+            <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">Skip</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

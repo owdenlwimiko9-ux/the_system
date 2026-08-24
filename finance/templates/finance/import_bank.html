@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Step 3: Import Bank Payment Report</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Bank Source</label>
+                <select name="bank_source" class="form-control">
+                    <option value="nmb">NMB</option>
+                    <option value="crdb">CRDB</option>
+                    <option value="gepg">GePG</option>
+                    <option value="selcom">Selcom</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Upload Payment CSV from Bank</label>
+                <input type="file" name="bank_file" class="form-control" accept=".csv" required>
+                <small>Required columns: <code>ControlNumber, Amount, PaymentDate</code></small>
+            </div>
+            <button type="submit" class="btn btn-primary">Import Payments</button>
+        </form>
+    </div>
+</div>
+
+<hr>
+<h5>Import History</h5>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Date</th><th>Bank</th><th>File</th><th>Matched</th><th>Not Found</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.imported_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ log.get_bank_source_display }}</td>
+            <td>{{ log.file_name }}</td>
+            <td class="text-success">{{ log.matched }}</td>
+            <td class="text-danger">{{ log.not_found }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No imports yet</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

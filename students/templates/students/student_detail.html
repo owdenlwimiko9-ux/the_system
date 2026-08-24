@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}{{ student.full_name }} | Student Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 2rem;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 1rem;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .badge-grade { font-size: 0.9rem; padding: 0.5rem 0.8rem; }
+    .exam-card {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .term-header {
+        border-left: 4px solid #667eea;
+        padding-left: 1rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-person-badge text-primary"></i> Student Profile</h2>
+        <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header mb-4 shadow">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                {% if student.photo %}
+                <img src="{{ student.photo.url }}" class="rounded-circle border border-4 border-white" style="width:140px; height:140px; object-fit:cover;">
+                {% else %}
+                <img src="/static/img/avatar.png" class="rounded-circle border border-4 border-white" style="width:140px; height:140px; object-fit:cover;">
+                {% endif %}
+            </div>
+            <div class="col-md-7">
+                <h3 class="mb-1">{{ student.full_name|title }}</h3>
+                <p class="mb-2 opacity-75">{{ student.admission_number }} • {{ class_name }}</p>
+                <span class="badge bg-light text-dark"><i class="bi bi-check-circle-fill text-success"></i> {{ student.get_status_display }}</span>
+            </div>
+            <div class="col-md-3 text-end">
+                <small>Admission Year</small>
+                <h4>{{ student.admission_year }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- LEFT COLUMN -->
+        <div class="col-lg-4">
+            <div class="card stat-card shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-people-fill text-primary"></i> Guardian Information</div>
+                <div class="card-body">
+                    <p><i class="bi bi-person text-muted"></i> <strong>{{ student.guardian|default:"-" }}</strong></p>
+                    <p><i class="bi bi-telephone text-muted"></i> {{ student.guardian.phone|default:"-" }}</p>
+                    <p><i class="bi bi-envelope text-muted"></i> {{ student.guardian.email|default:"-" }}</p>
+                    <p><i class="bi bi-geo-alt text-muted"></i> {{ student.guardian.address|default:"-" }}</p>
+                </div>
+            </div>
+
+            <div class="card stat-card shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-info-circle text-info"></i> Personal Information</div>
+                <div class="card-body">
+                    <p><strong>Gender:</strong> {{ student.get_gender_display|default:"-" }}</p>
+                    <p><strong>DOB:</strong> {{ student.date_of_birth|date:"d M, Y"|default:"-" }}</p>
+                    <p><strong>Nationality:</strong> {{ student.nationality|default:"-" }}</p>
+                    <p><strong>Religion:</strong> {{ student.religion|default:"-" }}</p>
+                    <p><strong>Blood Group:</strong> {{ student.blood_group|default:"-" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="col-lg-8">
+            <div class="card stat-card shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-mortarboard text-warning"></i> Academic Information</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Class:</strong><br>{{ class_name }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Level:</strong><br>{{ level_display }}</p>
+                        </div>
+                        <div class="col-6"><p><strong>Admission No:</strong><br>{{ student.admission_number }}</p></div>
+                        <div class="col-6"><p><strong>Admission Date:</strong><br>{{ student.admission_date|date:"d M, Y"|default:"-" }}</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stat-card shadow-sm mb-3">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-calendar-check text-success"></i> Attendance Overview</span>
+                    <a href="{% url 'students:student_attendance_report' student.id %}" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i> Full Report</a>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col"><div class="p-2 bg-light rounded"><h4>{{ stats.total|default:0 }}</h4><small>Total</small></div></div>
+                        <div class="col"><div class="p-2 bg-success bg-opacity-10 rounded"><h4 class="text-success">{{ stats.present|default:0 }}</h4><small>Present</small></div></div>
+                        <div class="col"><div class="p-2 bg-danger bg-opacity-10 rounded"><h4 class="text-danger">{{ stats.absent|default:0 }}</h4><small>Absent</small></div></div>
+                        <div class="col"><div class="p-2 bg-warning bg-opacity-10 rounded"><h4 class="text-warning">{{ stats.late|default:0 }}</h4><small>Late</small></div></div>
+                        <div class="col"><div class="p-2 bg-primary bg-opacity-10 rounded"><h4 class="text-primary">{{ stats.percentage|default:0 }}%</h4><small>Rate</small></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACADEMIC HISTORY -->
+            <div class="card stat-card shadow-sm">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-bar-chart-line text-danger"></i> Academic History</div>
+                <div class="card-body">
+                    {% for term_name, reports in terms.items %}
+                    <div class="mb-4">
+                        <h5 class="term-header fw-bold text-primary mb-3">{{ term_name }}</h5>
+
+                        {% for report in reports %}
+                        <div class="exam-card card mb-3">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0"><i class="bi bi-journal-text"></i> {{ report.exam.name }}</h6>
+                                    <small class="text-muted">
+                                        Total: <strong>{{ report.total_marks }}</strong> | Avg: <strong>{{ report.average_marks|floatformat:1 }}%</strong>
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    {% if report.average_marks >= 75 %}<span class="badge bg-success badge-grade">A</span>
+                                    {% elif report.average_marks >= 65 %}<span class="badge bg-primary badge-grade">B</span>
+                                    {% elif report.average_marks >= 45 %}<span class="badge bg-info badge-grade">C</span>
+                                    {% elif report.average_marks >= 30 %}<span class="badge bg-warning text-dark badge-grade">D</span>
+                                    {% elif report.average_marks >= 20 %}<span class="badge bg-danger badge-grade">F</span>
+                                    {% else %}<span class="badge bg-dark badge-grade">G</span>
+                                    {% endif %}
+                                    
+                                    <br>
+                                    <span class="badge bg-dark mt-1"><i class="bi bi-trophy"></i> {{ report.class_position|default:"-" }}/{{ report.total_students|default:"-" }}</span>
+
+                                    {% if level_group != 'PRE_PRIMARY' %}
+                                    <br>
+                                    <span class="badge bg-secondary mt-1">
+                                        Div {{ report.division|default:"-" }} {% if report.division_points %} | Pts: {{ report.division_points }}{% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if report.subjects %}
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th class="text-center">Test</th>
+                                                <th class="text-center">Exam</th>
+                                                <th class="text-center">Total</th>
+                                                <th class="text-center">Avg</th>
+                                                <th class="text-center">Grade</th>
+                                                <th class="text-center">Pos</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for res in report.subjects %}
+                                            <tr>
+                                                <td class="fw-semibold">{{ res.subject.name }}</td>
+                                                <td class="text-center">{{ res.test_marks }}</td>
+                                                <td class="text-center">{{ res.exam_marks }}</td>
+                                                <td class="text-center"><strong>{{ res.total_marks }}</strong></td>
+                                                <td class="text-center">{{ res.average_marks|floatformat:1 }}</td>
+                                                <td class="text-center">
+                                                    {% if res.average_marks >= 75 %}<span class="badge bg-success">A</span>
+                                                    {% elif res.average_marks >= 65 %}<span class="badge bg-primary">B</span>
+                                                    {% elif res.average_marks >= 45 %}<span class="badge bg-info">C</span>
+                                                    {% elif res.average_marks >= 30 %}<span class="badge bg-warning text-dark">D</span>
+                                                    {% elif res.average_marks >= 20 %}<span class="badge bg-danger">F</span>
+                                                    {% else %}<span class="badge bg-dark">G</span>{% endif %}
+                                                </td>
+                                                <td class="text-center"><span class="badge bg-secondary">{{ res.position|default:"-" }}</span></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="card-body text-center text-muted">
+                                <i class="bi bi-inbox"></i> No subject breakdown uploaded
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-journal-x fs-1"></i>
+                        <p>No exam results uploaded yet</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

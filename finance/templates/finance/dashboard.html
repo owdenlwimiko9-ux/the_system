@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Finance Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-cash-coin text-primary"></i> Finance Dashboard</h2>
+    <div>
+        <a href="{% url 'finance:generate_bills' %}" class="btn btn-primary me-2">
+            <i class="bi bi-receipt"></i> Generate Bills
+        </a>
+        <a href="{% url 'finance:import_bank_report' %}" class="btn btn-success me-2">
+            <i class="bi bi-upload"></i> Import BANK Report
+        </a>
+        <a href="{% url 'admin:finance_expense_add' %}" class="btn btn-outline-danger">
+            <i class="bi bi-dash-circle"></i> New Expense
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Fees Collected</h6>
+                <h3 class="fw-bold text-success">TSh {{ total_fees_collected|floatformat:0 }}</h3>
+                <small class="text-muted">{{ total_paid_bills }} Paid Bills</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm border-start border-warning border-4 h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Pending Fees</h6>
+                <h3 class="fw-bold text-warning">TSh {{ pending_fees|floatformat:0 }}</h3>
+                <small class="text-muted">{{ total_unpaid_bills }} Unpaid Bills</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Current Balance</h6>
+                <h3 class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                    TSh {{ balance|floatformat:0 }}
+                </h3>
+                <small class="text-muted">Income: TSh {{ total_income|floatformat:0 }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm border-start border-danger border-4 h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small">Total Expenses</h6>
+                <h3 class="fw-bold text-danger">TSh {{ total_expenses|floatformat:0 }}</h3>
+                <small class="text-muted">Donations: TSh {{ total_donations|floatformat:0 }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 Column Section -->
+<div class="row g-4">
+    <!-- Recently Paid Bills -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-check-circle text-success"></i> Recently Paid</h5>
+                <a href="{% url 'finance:unpaid_bills' %}?status=paid" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Control No</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bill in recent_paid %}
+                            <tr>
+                                <td><a href="{% url 'finance:bill_detail' bill.id %}">{{ bill.student }}</a></td>
+                                <td><code>{{ bill.control_number|default:"-" }}</code></td>
+                                <td class="fw-bold text-success">TSh {{ bill.amount_paid|floatformat:0 }}</td>
+                                <td>{{ bill.payment_date|date:"M d" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">No payments yet</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unpaid Bills Alert -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-warning">
+            <div class="card-header bg-warning-subtle">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle text-warning"></i> Unpaid Bills</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Total Outstanding: <span class="fw-bold text-warning">TSh {{ pending_fees|floatformat:0 }}</span></p>
+                <p class="mb-3"><span class="badge bg-warning text-dark">{{ total_unpaid_bills }}</span> students have not paid</p>
+                <a href="{% url 'finance:unpaid_bills' %}" class="btn btn-warning btn-sm w-100">
+                    View Unpaid Bills
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> All Recent Activity</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_transactions %}
+                            <tr>
+                                <td>{{ tx.date|date:"M d" }}</td>
+                                <td><span class="badge {% if tx.is_income %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">{{ tx.type }}</span></td>
+                                <td class="text-end fw-bold {% if tx.is_income %}text-success{% else %}text-danger{% endif %}">
+                                    {% if tx.is_income %}+{% else %}-{% endif %}TSh {{ tx.amount|floatformat:0|cut:"-" }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted py-3">No activity</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> {{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Exam Name</label>
+                            {{ form.name }}
+                            <small class="text-muted">e.g. Mid Term 1</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Exam Type</label>
+                            {{ form.exam_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Academic Term</label>
+                            {{ form.term }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Class</label>
+                            {{ form.class_room }}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label">Mark as Active - allows result entry</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Exam</button>
+                    <a href="{% url 'academics:exam_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

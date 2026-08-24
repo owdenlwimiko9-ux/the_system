@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Take Attendance - {{ class_room.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Take Attendance: {{ class_room.name }}</h2>
+        <div>
+            <span class="badge bg-primary fs-6">{{ today|date:"D, M d, Y" }}</span>
+            <a href="{% url 'students:student_list' %}" class="btn btn-outline-dark btn-sm">← Back</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 10%;">Admission No</th>
+                                <th>Student Name</th>
+                                <th style="width: 25%;" class="text-center">Attendance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ student.admission_number }}</td>
+                                <td>{{ student.full_name|title }}</td>
+                                <td>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="student_{{ student.id }}" id="p{{ student.id }}" value="P" 
+                                            {% if student.today_status == 'P' %}checked{% endif %} required>
+                                        <label class="btn btn-outline-success" for="p{{ student.id }}">Present</label>
+
+                                        <input type="radio" class="btn-check" name="student_{{ student.id }}" id="a{{ student.id }}" value="A"
+                                            {% if student.today_status == 'A' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger" for="a{{ student.id }}">Absent</label>
+
+                                        <input type="radio" class="btn-check" name="student_{{ student.id }}" id="l{{ student.id }}" value="L"
+                                            {% if student.today_status == 'L' %}checked{% endif %}>
+                                        <label class="btn btn-outline-warning" for="l{{ student.id }}">Late</label>
+
+                                        <input type="radio" class="btn-check" name="student_{{ student.id }}" id="e{{ student.id }}" value="E"
+                                            {% if student.today_status == 'E' %}checked{% endif %}>
+                                        <label class="btn btn-outline-info" for="e{{ student.id }}">Excused</label>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No active students in this class</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-success btn-lg">Save Attendance</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

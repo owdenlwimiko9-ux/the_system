@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Academics{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="fw-bold mb-0"><i class="bi bi-mortarboard text-primary"></i> Academics Menu</h2>
+    <span class="badge bg-success fs-6">Year: {{ active_year.name|default:"Not Set" }}</span>
+</div>
+
+<!-- Quick Links -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{% url 'academics:class_list' %}" class="btn btn-primary">
+        <i class="bi bi-building"></i> Classes
+    </a>
+    <a href="{% url 'academics:teacher_list' %}" class="btn btn-outline-info">
+        <i class="bi bi-person-badge"></i> Teachers
+    </a>
+    <a href="{% url 'academics:subject_list' %}" class="btn btn-outline-warning">
+        <i class="bi bi-book"></i> Subjects
+    </a>
+    <a href="{% url 'academics:exam_list' %}" class="btn btn-outline-danger">
+        <i class="bi bi-journal-check"></i> Exams
+    </a>
+    <a href="{% url 'academics:year_list' %}" class="btn btn-outline-success">
+        <i class="bi bi-calendar3"></i> Academic Years
+    </a>
+</div>
+
+<!-- Classes -->
+<h4 class="fw-bold mb-3">All Classes</h4>
+<div class="row g-3">
+    {% for cls in classes %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card academic-card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold">{{ cls.get_level_display }} - {{ cls.stream }}</h5>
+                <span class="badge bg-secondary mb-2">{{ cls.level_group }}</span>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-info">{{ cls.student_count }} Students</span>
+                    {% if cls.class_teacher %}
+                        <small class="text-muted"><i class="bi bi-person-check"></i> {{ cls.class_teacher.last_name }}</small>
+                    {% else %}
+                        <small class="text-muted">No Teacher</small>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'academics:class_overview' cls.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-speedometer2"></i> Class Exams Reports
+                    </a>
+                    <a href="{% url 'academics:class_dashboard' cls.id %}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-people"></i> Students in Class
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-building fs-1 text-muted d-block mb-3"></i>
+        <h5>No classes yet</h5>
+        <a href="{% url 'academics:class_create' %}" class="btn btn-primary mt-2">
+            <i class="bi bi-plus-lg"></i> Add First Class
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

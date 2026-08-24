@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Academic Years{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between">
+        <h5 class="mb-0"><i class="bi bi-calendar3"></i> Academic Years</h5>
+        <a href="{% url 'academics:year_create' %}" class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i> Add Year</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Year Name</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for y in years %}
+            <tr class="{% if y.is_active %}table-success{% endif %}">
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ y.name }}</strong></td>
+                <td>
+                    {% if y.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not y.is_active %}
+                    <a href="{% url 'academics:year_activate' y.pk %}" class="btn btn-sm btn-outline-success">Set Active</a>
+                    {% endif %}
+                    <a href="{% url 'academics:year_update' y.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No academic years yet</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

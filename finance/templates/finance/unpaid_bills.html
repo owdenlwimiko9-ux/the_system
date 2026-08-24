@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Unpaid Bills{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4><i class="bi bi-exclamation-triangle text-warning"></i> Unpaid Bills</h4>
+        <span class="badge bg-danger fs-6">Total Outstanding: TSh {{ total_outstanding|floatformat:0 }}</span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">{{ count }} students have not paid in full</p>
+
+        <!-- SEARCH + EXPORT ROW -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <form method="get" class="row g-2 flex-grow-1 me-2">
+                <div class="col-md-4">
+                    <input type="text" name="q" class="form-control" placeholder="Search student name..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="class" class="form-select">
+                        <option value="">All Classes</option>
+                        {% for c in classes %}
+                        <option value="{{ c.id }}" {% if request.GET.class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.level }} {% if c.stream %}{{ c.stream }}{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Filter</button>
+                </div>
+            </form>
+            
+            <a href="/admin/finance/feepayment/?invoice_status__in=unpaid,partial,overdue" class="btn btn-success btn-sm" target="_blank">
+                <i class="bi bi-download"></i> Export Excel
+            </a>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Term</th>
+                        <th>Amount Due</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr>
+                        <td>{{ bill.student.full_name }}</td>
+                        <td>{{ bill.student.class_room.level }} {{ bill.student.class_room.stream }}</td>
+                        <td>{{ bill.fee_structure.term }} {{ bill.fee_structure.academic_year }}</td>
+                        <td>TSh {{ bill.amount_due|floatformat:0 }}</td>
+                        <td>TSh {{ bill.amount_paid|floatformat:0 }}</td>
+                        <td><strong>TSh {{ bill.balance|floatformat:0 }}</strong></td>
+                        <td>{{ bill.due_date|date:"d M Y" }}</td>
+                        <td>
+                            <span class="badge bg-{% if bill.invoice_status == 'overdue' %}danger{% elif bill.invoice_status == 'partial' %}warning{% else %}secondary{% endif %}">
+                                {{ bill.get_invoice_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'finance:bill_detail' bill.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center">No unpaid bills 🎉</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

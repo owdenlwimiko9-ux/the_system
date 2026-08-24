@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}{{ class_room }} Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .header-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .stat-card {
+        border-radius: 15px;
+        border: none;
+        transition: transform .2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,.12);
+    }
+    .exam-card {
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+    }
+    .table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .badge-grade { font-size: .85rem; padding: 6px 10px; border-radius: 20px; }
+    .teacher-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #eee;
+    }
+    .teacher-name { font-weight: 600; color: #444; }
+</style>
+
+<div class="container-fluid py-4">
+    <!-- Header Card -->
+    <div class="header-card p-4 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-people-fill"></i> {{ class_room }}</h2>
+            <p class="mb-0 opacity-75">Academic Year: {{ academic_year.name|default:"No Active Year" }}</p>
+        </div>
+        
+        <div>
+            
+            <a href="{% url 'academics:generate_reports' class_room.id %}" class="btn btn-light shadow-sm">
+                <i class="bi bi-gear-fill"></i> Generate Reports
+            </a>
+            {% if latest_exam %}
+            <a href="{% url 'academics:bulk_print_class_reports' class_room.id latest_exam.id %}"
+               class="btn btn-light shadow-sm"
+               style="background-color: white; color: #dc3545; border: 1px solid #dc3545; font-weight: 600;">
+                <i class="bi bi-printer-fill" style="color: #dc3545;"></i> Result Sheet
+            </a>
+            {% else %}
+            <a href="#" class="btn btn-light shadow-sm disabled" style="background-color: white; color: #dc3545; border: 1px solid #dc3545; font-weight: 600; opacity: 0.6;">
+                <i class="bi bi-printer-fill" style="color: #dc3545;"></i> No Exam Yet
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card text-center p-3">
+                <i class="bi bi-people-fill fs-2 text-primary mb-2"></i>
+                <h6 class="text-muted">Total Students</h6>
+                <h3 class="fw-bold text-primary">{{ student_count }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card text-center p-3">
+                <i class="bi bi-book-fill fs-2 text-success mb-2"></i>
+                <h6 class="text-muted">Total Subjects</h6>
+                <h3 class="fw-bold text-success">{{ subjects.count }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card text-center p-3">
+                <i class="bi bi-person-workspace fs-2 text-warning mb-2"></i>
+                <h6 class="text-muted">Total Teachers</h6>
+                <h3 class="fw-bold text-warning">{{ teachers.count }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card text-center p-3">
+                <i class="bi bi-award-fill fs-2 text-info mb-2"></i>
+                <h6 class="text-muted">Level System</h6>
+                <h5 class="fw-bold text-info">
+                    {% if class_room.level_group == 'PRE_PRIMARY' %} Pre-Primary
+                    {% elif class_room.level_group == 'ORDINARY' %} O-Level
+                    {% elif class_room.level_group == 'ADVANCED' %} A-Level
+                    {% endif %}
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Teacher + Subject Teachers Row -->
+    <div class="row g-4 mb-4">
+        <!-- Class Teacher Card -->
+        <div class="col-lg-4">
+            <div class="card stat-card h-100">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-person-badge text-info"></i> Class Teacher</h6>
+                </div>
+                <div class="card-body">
+                    {% if class_room.class_teacher %}
+                    <div class="d-flex align-items-center">
+                        {% if class_room.class_teacher.photo %}
+                            <img src="{{ class_room.class_teacher.photo.url }}" class="teacher-avatar me-3">
+                        {% else %}
+                            <img src="/static/img/avatar.png" class="teacher-avatar me-3">
+                        {% endif %}
+                        <div>
+                            <div class="teacher-name fs-5">{{ class_room.class_teacher.first_name }} {{ class_room.class_teacher.last_name }}</div>
+                            <small class="text-muted"><i class="bi bi-telephone"></i> {{ class_room.class_teacher.phone|default:"No phone" }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No Class Teacher Assigned</p>
+                    <a href="/admin/academics/classroom/{{ class_room.id }}/change/" class="btn btn-sm btn-outline-primary w-100">Assign in Admin</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Teachers Card -->
+        <div class="col-lg-8">
+            <div class="card stat-card h-100">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-person-workspace text-primary"></i> Subject Teachers</h6>
+                </div>
+                <div class="card-body">
+                    {% if teachers %}
+                    <div class="row">
+                        {% for teacher in teachers %}
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-2 rounded" style="background:#f8f9fa;">
+                                {% if teacher.photo %}
+                                    <img src="{{ teacher.photo.url }}" class="teacher-avatar me-3">
+                                {% else %}
+                                    <img src="/static/img/avatar.png" class="teacher-avatar me-3">
+                                {% endif %}
+                                <div>
+                                    <div class="teacher-name">{{ teacher.first_name }} {{ teacher.last_name }}</div>
+                                    <small class="text-muted">{{ teacher.phone|default:"" }}</small>
+                                    <div class="mt-1">
+                                        {% for subject in teacher.subjects.all %}
+                                            {% if subject.class_room == class_room %}
+                                                <span class="badge bg-light text-dark border me-1">{{ subject.name }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No teachers assigned to subjects in this class</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exams by Term -->
+    {% for term_label, exams_list in term_exams.items %}
+    <div class="card exam-card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+            {# BIG HEADER: FORCED TERM NAME #}
+            <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-event text-primary"></i> 
+                TERM {{ forloop.counter }}
+                {% if forloop.counter == 1 %}MIDTERM 1
+                {% elif forloop.counter == 2 %}TERMINAL
+                {% elif forloop.counter == 3 %}MIDTERM 2
+                {% elif forloop.counter == 4 %}ANNUAL
+                {% else %}{{ term_label }}
+                {% endif %}
+            </h5>
+
+            <div class="no-print">
+                {# NEW BUTTON: SEND TO PARENTS #}
+                {% if exams_list %}
+                <a href="{% url 'academics:send_results_to_parents' class_room.id forloop.counter %}" 
+                   class="btn btn-sm btn-success"
+                   onclick="return confirm('Send TERM {{ forloop.counter }} results to all parents?')">
+                    <i class="bi bi-send-fill"></i> Send to Parents
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            {% if exams_list %}
+                {% for item in exams_list %}
+                <div class="mb-4 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        {# SMALL EXAM NAME: ALSO FORCED #}
+                        <h6 class="fw-bold"><i class="bi bi-journal-check text-primary"></i> 
+                            {% if forloop.parentloop.counter == 1 %}Midterm 1
+                            {% elif forloop.parentloop.counter == 2 %}Terminal
+                            {% elif forloop.parentloop.counter == 3 %}Midterm 2
+                            {% elif forloop.parentloop.counter == 4 %}Annual
+                            {% else %}{{ item.exam.name }}
+                            {% endif %}
+                        </h6>
+                        <div class="no-print">
+                            <a href="{% url 'academics:bulk_upload_results' item.exam.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-upload"></i> Upload
+                            </a>
+                            <a href="{% url 'academics:bulk_print_class_reports' class_room.id item.exam.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-printer"></i> Print All
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Pos</th>
+                                    <th>Student</th>
+                                    <th>Adm No</th>
+                                    <th>Total</th>
+                                    <th>Average</th>
+                                    <th>Performance</th> 
+                                    <th class="no-print">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in item.reports %}
+                                <tr>
+                                    <td><span class="badge bg-dark rounded-pill px-3">{{ report.position }}</span></td>
+                                    <td class="fw-semibold">{{ report.student.first_name }} {{ report.student.last_name }}</td>
+                                    <td>{{ report.student.admission_number }}</td>
+                                    <td>{{ report.total_marks|floatformat:1 }}</td>
+                                    <td>{{ report.average_marks|floatformat:1 }}%</td>
+                                    <td>
+                                        {% if class_room.level_group == 'PRE_PRIMARY' %}
+                                            {% with avg=report.average_marks %}
+                                                {% if avg >= 75 %}<span class="badge bg-success badge-grade">Grade: A</span>
+                                                {% elif avg >= 65 %}<span class="badge bg-primary badge-grade">Grade: B</span>
+                                                {% elif avg >= 45 %}<span class="badge bg-info badge-grade">Grade: C</span>
+                                                {% elif avg >= 30 %}<span class="badge bg-warning text-dark badge-grade">Grade: D</span>
+                                                {% else %}<span class="badge bg-danger badge-grade">Grade: F</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        
+                                        {% elif class_room.level_group == 'ORDINARY' %}
+                                            <span class="badge bg-primary badge-grade">Pts: {{ report.division_points|floatformat:0 }}</span>
+                                            <span class="badge bg-info text-dark badge-grade">{{ report.division }}</span>
+
+                                        {% elif class_room.level_group == 'ADVANCED' %}
+                                            <span class="badge bg-warning text-dark badge-grade">Pts: {{ report.division_points|floatformat:0 }}</span>
+                                            <span class="badge bg-info text-dark badge-grade">{{ report.division }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="no-print">
+                                        <a href="{% url 'academics:report_detail' report.id %}" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center text-muted py-3">No reports generated yet</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted text-center py-3">No exams created for 
+                    {% if forloop.counter == 1 %}TERM 1 MIDTERM 1
+                    {% elif forloop.counter == 2 %}TERM 2 TERMINAL
+                    {% elif forloop.counter == 3 %}TERM 3 MIDTERM 2
+                    {% elif forloop.counter == 4 %}TERM 4 ANNUAL
+                    {% else %}{{ term_label }}
+                    {% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+}
+</style>
+{% endblock %}

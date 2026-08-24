@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Mark Attendance - {{ class_room }}{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">{{ class_room.level }} {{ class_room.stream }}</h2>
+        <p class="text-muted mb-0">
+            <i class="bi bi-calendar-date"></i> {{ selected_date|date:"l, F j, Y" }} | 
+            <i class="bi bi-people"></i> {{ students.count }} Active Students
+        </p>
+    </div>
+    <a href="{% url 'students:daily_attendance_summary' %}?date={{ selected_date|date:'Y-m-d' }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Summary
+    </a>
+</div>
+
+<!-- DATE PICKER CARD -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Select Date</label>
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="form-control" onchange="this.form.submit()">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Load</button>
+            </div>
+            <div class="col-md-7 text-end">
+                <span class="badge bg-primary">Tip: Use keyboard 1=P 2=A 3=L 4=E</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ATTENDANCE FORM -->
+<form method="POST">
+    {% csrf_token %}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><i class="bi bi-clipboard-check"></i> Student List</span>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-save"></i> Save Attendance
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 50px;">Photo</th>
+                            <th>Admission No</th>
+                            <th>Student Name</th>
+                            <th style="width: 400px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if student.photo %}
+                                    <img src="{{ student.photo.url }}" class="rounded-circle" width="40" height="40" style="object-fit: cover;">
+                                {% else %}
+                                    <span class="badge rounded-pill bg-secondary">{{ student.first_name|first }}{{ student.last_name|first }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-semibold">{{ student.admission_number }}</td>
+                            <td class="fw-bold">{{ student.full_name }}</td>
+                            <td>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="student_{{ student.id }}" id="p{{ student.id }}" value="P" {% if student.today_status == 'P' %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-success btn-sm" for="p{{ student.id }}"><i class="bi bi-check-circle"></i> Present</label>
+
+                                    <input type="radio" class="btn-check" name="student_{{ student.id }}" id="a{{ student.id }}" value="A" {% if student.today_status == 'A' %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-danger btn-sm" for="a{{ student.id }}"><i class="bi bi-x-circle"></i> Absent</label>
+
+                                    <input type="radio" class="btn-check" name="student_{{ student.id }}" id="l{{ student.id }}" value="L" {% if student.today_status == 'L' %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-warning btn-sm" for="l{{ student.id }}"><i class="bi bi-clock"></i> Late</label>
+
+                                    <input type="radio" class="btn-check" name="student_{{ student.id }}" id="e{{ student.id }}" value="E" {% if student.today_status == 'E' %}checked{% endif %} autocomplete="off">
+                                    <label class="btn btn-outline-info btn-sm" for="e{{ student.id }}"><i class="bi bi-info-circle"></i> Excused</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                No active students in this class
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white text-end">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-save-fill"></i> Save Attendance for {{ selected_date|date:"d M Y" }}
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- KEYBOARD SHORTCUT JS -->
+<script>
+document.addEventListener('keydown', function(e) {
+    if(e.target.tagName === 'INPUT') return; // don't trigger in inputs
+    const keyMap = {'1': 'P', '2': 'A', '3': 'L', '4': 'E'};
+    if(keyMap[e.key]){
+        document.querySelectorAll('tr').forEach(row => {
+            const radio = row.querySelector(`input[value="${keyMap[e.key]}"]`);
+            if(radio) radio.checked = true;
+        });
+    }
+});
+</script>
+{% endblock %}
