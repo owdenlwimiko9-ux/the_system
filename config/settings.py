@@ -1,21 +1,22 @@
 """
 Django settings for config project.
-Django 6.0.6
+Django 5.0.x
 """
 
 from pathlib import Path
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
-SECRET_KEY = 'django-insecure-3s3eq04o)zlbmecy6j6&)zcr-f=8^!^#xm2l_ug__+ys-zdpct'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'delicate-grab-numbly.ngrok-free.dev']
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-3s3eq04o)zlbmecy6j6&)zcr-f=8^!^#xm2l_ug__+ys-zdpct')
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true' 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'the-system-otxf.onrender.com', '.onrender.com'] # <- Ongeza .onrender.com
 
 # APPLICATION DEFINITION
 INSTALLED_APPS = [
-    # Your apps
     "accounts",
     "students", 
     "academics",
@@ -23,8 +24,6 @@ INSTALLED_APPS = [
     "dashboard",
     "import_export",
     "finance",
-
-    # Django apps
     "django.contrib.humanize",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -36,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,12 +67,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# DATABASE
+# DATABASE - Tumia Postgres ya Render kiotomatiki
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+        ssl_require=True # <- Ongeza hii kwa Postgres ya Render
+    )
 }
 
 # PASSWORD VALIDATION
@@ -85,13 +86,15 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # INTERNATIONALIZATION
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Dar_es_Salaam' 
 USE_I18N = True
 USE_TZ = True
 
 # STATIC & MEDIA
-STATIC_URL = 'static/'
-STATICFILES_DIRS = []
+STATIC_URL = '/static/' # <- Ongeza / mbele
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATICFILES_DIRS = [BASE_DIR / 'static'] 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -99,6 +102,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # CUSTOM USER & AUTH
 AUTH_USER_MODEL = "accounts.User"
 
-LOGIN_URL = 'login'  # name not path
+LOGIN_URL = 'login'  
 LOGOUT_REDIRECT_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard:home'  # fallback if no role match
+LOGIN_REDIRECT_URL = 'dashboard:home'
