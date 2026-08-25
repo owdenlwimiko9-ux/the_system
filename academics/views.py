@@ -586,7 +586,7 @@ def send_results_to_parents(request, class_id, term_number):
         report.position = pos
     term_label = {1: 'Midterm 1', 2: 'Terminal', 3: 'Midterm 2', 4: 'Annual'}.get(term_number)
     message_data = []
-    domain = "https://delicate-grab-numbly.ngrok-free.dev"
+    domain = f"https://the-system-otxf.onrender.com/academics/report/64/"
     for report in reports:
         guardian = report.student.guardian
         if not guardian or not guardian.phone: continue
