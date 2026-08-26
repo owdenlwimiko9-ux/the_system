@@ -3,7 +3,7 @@ from . import views
 
 app_name = 'academics'
 
-urlpatterns = [
+rlpatterns = [
     path('', views.class_list, name='class_list'),
     path('dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
 
