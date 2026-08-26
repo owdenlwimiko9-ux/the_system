@@ -67,11 +67,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# DATABASE - Render anajua SSL yenyewe. Tusiongeze ssl_require
+# DATABASE - Postgres kwa Render, SQLite kwa local
 DATABASES = {
     'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',  # Fallback ya local
+        conn_max_age=600,
+        ssl_require=True  # Muhimu kwa Render Postgres
     )
 }
 
@@ -104,3 +105,9 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = 'login'  
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard:home'
+
+# SECURITY kwa Production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
