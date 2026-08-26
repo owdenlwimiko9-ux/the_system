@@ -586,7 +586,8 @@ def send_results_to_parents(request, class_id, term_number):
         report.position = pos
     term_label = {1: 'Midterm 1', 2: 'Terminal', 3: 'Midterm 2', 4: 'Annual'}.get(term_number)
     message_data = []
-    domain = f"https://the-system-otxf.onrender.com/academics/report/64/"
+    domain = "https://the-system-otxf.onrender.com" # FIXED: Hakuna /64/ tena
+
     for report in reports:
         guardian = report.student.guardian
         if not guardian or not guardian.phone: continue
@@ -594,7 +595,8 @@ def send_results_to_parents(request, class_id, term_number):
         if phone.startswith('0'): phone = '255' + phone[1:]
         elif not phone.startswith('255'): phone = '255' + phone
         student_name = _get_student_name(report.student)
-        result_url = domain + reverse('academics:report_detail', args=[report.id])
+        result_url = f"{domain}{reverse('academics:report_detail', args=[report.id])}" # FIXED: Link sahihi
+
         message = f"""*BABY A SCHOOL*
 Ndugu mzazi wa {student_name}
 
