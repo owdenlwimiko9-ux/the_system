@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KILAMSA SCHOOLS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body { font-family: 'Segoe UI'; margin:0; }
+        .top-bar { background:#002244; color:white; padding:8px 60px; font-size:14px; display:flex; justify-content:space-between; }
+        .navbar-public { background:white; padding:15px 60px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 10px rgba(0,0,0,0.1); position:sticky; top:0; z-index:1000; }
+        .logo { font-size:22px; font-weight:bold; color:#003366; } .logo span { color:#FFD700; }
+        .menu a { color:#003366; text-decoration:none; margin-left:25px; font-weight:600; }
+        .menu a:hover { color:#2563eb; }
+        .hero { background: linear-gradient(rgba(0,51,102,0.75), rgba(0,51,102,0.75)), url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1600') center/cover; color:white; padding:100px 60px; }
+        .btn-gold { background:#FFD700; color:#003366; padding:12px 25px; border-radius:6px; font-weight:bold; text-decoration:none; }
+        .btn-blue { background:#003366; color:white; padding:12px 25px; border-radius:6px; font-weight:bold; text-decoration:none; }
+        .footer { background:#0c152d; color:rgba(255,255,255,0.8); padding:40px 60px; text-align:center; margin-top:50px; }
+    </style>
+</head>
+<body>
+    <div class="top-bar"><span><i class="bi bi-geo-alt"></i> Mlimba - Morogoro, TZ</span><span><i class="bi bi-telephone"></i> +255 7XX XXX XXX | info@kilamsa.ac.tz</span></div>
+    <div class="navbar-public">
+        <div class="logo">KILAMSA <span>SCHOOLS</span></div>
+        <div class="menu">
+            <a href="/">Home</a>
+            <a href="/about/">About</a>
+            <a href="/academics/">Academics</a>
+            <a href="/admission/">Admission</a>
+            <a href="/teachers/">Teachers</a>
+            <a href="/school-management/" style="background:#2563eb; color:white; padding:8px 16px; border-radius:6px;"><i class="bi bi-box-arrow-in-right"></i> School Management</a>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+    <div class="footer">
+        <h5><i class="bi bi-mortarboard-fill text-warning"></i> KILAMSA SCHOOLS</h5>
+        <p>Pre-Primary, Primary & Secondary • Excellence • Discipline • Integrity</p>
+        <p>© 2026 KILAMSA. Developed by Odiztech</p>
+    </div>
+</body>
+</html>

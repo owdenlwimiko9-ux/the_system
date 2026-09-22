@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "dashboard",
     "import_export",
     "finance",
+    'website',
     "django.contrib.humanize",
     "django.contrib.admin",
     "django.contrib.auth",

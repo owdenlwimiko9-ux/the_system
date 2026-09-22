@@ -1,0 +1,31 @@
+{% extends 'base_public.html' %}
+{% block content %}
+<div class="hero">
+    <h1 style="font-size:45px; font-weight:bold;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
+    <p style="color:#FFD700; font-size:22px; margin:20px 0;">Excellence • Discipline • Integrity</p>
+    <p style="max-width:600px; font-size:18px;">Modern education from Pre-Primary to Form Six with full digital management for Students, Fees, Results & Attendance.</p>
+    <div style="margin-top:30px;">
+        <a href="/admission/" class="btn-gold">Apply Now</a>
+        <a href="/school-management/" class="btn-blue" style="margin-left:10px;">Go to System</a>
+    </div>
+</div>
+
+<div style="padding:60px; display:grid; grid-template-columns:repeat(3,1fr); gap:30px;">
+    <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
+        <i class="bi bi-book" style="font-size:40px; color:#2563eb;"></i>
+        <h4 style="color:#0c152d; margin-top:15px;">Quality Education</h4>
+        <p>NECTA curriculum from Baby Class to Form 6</p>
+    </div>
+    <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
+        <i class="bi bi-people" style="font-size:40px; color:#2563eb;"></i>
+        <h4 style="color:#0c152d; margin-top:15px;">Smart Management</h4>
+        <p>Connected to your Dashboard, Students & Finance system</p>
+        <a href="/school-management/">Open System →</a>
+    </div>
+    <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
+        <i class="bi bi-award" style="font-size:40px; color:#2563eb;"></i>
+        <h4 style="color:#0c152d; margin-top:15px;">Experienced Teachers</h4>
+        <p>Qualified staff for academic excellence</p>
+    </div>
+</div>
+{% endblock %}
