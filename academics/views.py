@@ -4,15 +4,14 @@ from django.http import HttpResponse
 from django.db.models import Avg, Sum, Count, Q
 from django import forms
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from urllib.parse import quote
 from django.utils import timezone
 import openpyxl
 
-from .models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
+from.models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
 from students.models import Student
-from .forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
-from accounts.views import is_teacher
+from.forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
 
 # ========== FORMS ==========
 class TeacherForm(forms.ModelForm):
@@ -54,7 +53,6 @@ def get_advanced_points(score):
     else: return 5
 
 def calculate_best_points(all_points, level_group):
-    """Returns: best_sum, division_name. Forces Best 7 for O, Best 3 for A"""
     if not all_points: return 0, '-'
     if level_group == 'ORDINARY':
         if 9 in all_points:
@@ -67,12 +65,10 @@ def calculate_best_points(all_points, level_group):
         elif 26 <= total <= 34: div = 'Division IV'
         else: div = 'Division 0'
         return total, div
-
     if level_group == 'ADVANCED':
-        points_no_gs = [p for p in all_points if p!= 5]
         if 5 in all_points:
             return sum(all_points), 'Division 0'
-        best = sorted(points_no_gs)[:3]
+        best = sorted([p for p in all_points if p!= 5])[:3]
         total = sum(best)
         if 3 <= total <= 9: div = 'Division I'
         elif 10 <= total <= 11: div = 'Division II'
@@ -81,14 +77,12 @@ def calculate_best_points(all_points, level_group):
         else: div = 'Division 0'
         return total, div
     return 0, '-'
-# ========== END GRADING ==========
 
 def _get_student_name(student):
     return f"{student.first_name} {student.middle_name or ''} {student.last_name}".strip()
 
 # ========== DASHBOARD ==========
 @login_required
-@user_passes_test(is_teacher)
 def class_list(request):
     context = {
         'classes_count': ClassRoom.objects.count(),
@@ -117,15 +111,7 @@ def class_dashboard(request, pk):
     students = cls.students.filter(status="ACTIVE", is_active=True).order_by('first_name')
     subjects = Subject.objects.filter(class_room=cls).select_related('teacher')
     academic_year = AcademicYear.objects.filter(is_active=True).first()
-
-    context = {
-        'cls': cls,
-        'students': students,
-        'subjects': subjects,
-        'student_count': students.count(),
-        'subject_count': subjects.count(),
-        'academic_year': academic_year,
-    }
+    context = {'cls': cls, 'students': students, 'subjects': subjects, 'student_count': students.count(), 'subject_count': subjects.count(), 'academic_year': academic_year}
     return render(request, 'academics/class_dashboard.html', context)
 
 def class_overview(request, class_id):
@@ -136,7 +122,6 @@ def class_overview(request, class_id):
     teachers = Teacher.objects.filter(subjects__in=subjects).distinct()
     exams = Exam.objects.filter(class_room=class_room, term__academic_year=academic_year).select_related('term').order_by('term__id', 'id')
     latest_exam = exams.last()
-
     term_mapping = {1: "TERM 1", 2: "TERM 2", 3: "TERM 3", 4: "TERM 4"}
     term_exams = {}
     for term_num, term_label in term_mapping.items():
@@ -147,25 +132,14 @@ def class_overview(request, class_id):
                 r.position = pos
                 r.total_students = students.count()
             term_exams[term_label].append({'exam': exam, 'reports': reports})
-
-    context = {
-        'class_room': class_room,
-        'students': students,
-        'teachers': teachers,
-        'subjects': subjects,
-        'student_count': students.count(),
-        'academic_year': academic_year,
-        'term_exams': term_exams,
-        'latest_exam': latest_exam
-    }
+    context = {'class_room': class_room, 'students': students, 'teachers': teachers, 'subjects': subjects, 'student_count': students.count(), 'academic_year': academic_year, 'term_exams': term_exams, 'latest_exam': latest_exam}
     return render(request, "academics/class_overview.html", context)
 
 def class_detail(request, pk):
     class_room = get_object_or_404(ClassRoom, id=pk)
     students = Student.objects.filter(class_room=class_room).order_by('first_name')
     exams = Exam.objects.filter(class_room=class_room, is_active=True)
-    context = {'class_room': class_room, 'students': students, 'exams': exams}
-    return render(request, 'academics/class_detail.html', context)
+    return render(request, 'academics/class_detail.html', {'class_room': class_room, 'students': students, 'exams': exams})
 
 # ========== YEAR VIEWS ==========
 def year_list(request):
@@ -246,12 +220,7 @@ def term_delete(request, pk):
 # ========== SUBJECT VIEWS ==========
 def subject_list(request):
     subjects = Subject.objects.select_related('class_room', 'teacher').all()
-    context = {
-        'subjects': subjects,
-        'assigned_count': subjects.filter(teacher__isnull=False).count(),
-        'unassigned_count': subjects.filter(teacher__isnull=True).count(),
-    }
-    return render(request, 'academics/subject_list.html', context)
+    return render(request, 'academics/subject_list.html', {'subjects': subjects, 'assigned_count': subjects.filter(teacher__isnull=False).count(), 'unassigned_count': subjects.filter(teacher__isnull=True).count()})
 
 def subject_create(request):
     if request.method == "POST":
@@ -283,16 +252,8 @@ def subject_delete(request, pk):
 
 # ========== TEACHER VIEWS ==========
 def teacher_list(request):
-    teachers = Teacher.objects.all().annotate(
-        subject_count=Count('subjects', distinct=True),
-        classroom_count=Count('classrooms', distinct=True)
-    )
-    context = {
-        'teachers': teachers,
-        'subjects_count': Subject.objects.count(),
-        'classes_count': ClassRoom.objects.count(),
-    }
-    return render(request, 'academics/teacher_list.html', context)
+    teachers = Teacher.objects.all().annotate(subject_count=Count('subjects', distinct=True), classroom_count=Count('classrooms', distinct=True))
+    return render(request, 'academics/teacher_list.html', {'teachers': teachers, 'subjects_count': Subject.objects.count(), 'classes_count': ClassRoom.objects.count()})
 
 def teacher_detail(request, pk):
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -328,13 +289,7 @@ def teacher_dashboard(request):
     my_classes = ClassRoom.objects.filter(class_teacher=teacher)
     my_subjects = Subject.objects.filter(teacher=teacher).select_related('class_room')
     active_exams = Exam.objects.filter(is_active=True)
-    context = {
-        'teacher': teacher,
-        'my_classes': my_classes,
-        'my_subjects': my_subjects,
-        'active_exams': active_exams,
-    }
-    return render(request, 'academics/teacher_dashboard.html', context)
+    return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_classes': my_classes, 'my_subjects': my_subjects, 'active_exams': active_exams})
 
 def assign_subject_to_teacher(request, pk):
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -433,13 +388,7 @@ def bulk_upload_results(request, exam_id):
             avg = results.aggregate(Avg('average_marks'))['average_marks__avg'] or 0
             total_all = sum(all_points)
             StudentReport.objects.filter(student=student, exam=exam).delete()
-            StudentReport.objects.create(
-                student=student, exam=exam, academic_year=exam.term.academic_year,
-                total_marks=total, average_marks=avg,
-                total_points=total_all,
-                division_points=best_sum,
-                division=division
-            )
+            StudentReport.objects.create(student=student, exam=exam, academic_year=exam.term.academic_year, total_marks=total, average_marks=avg, total_points=total_all, division_points=best_sum, division=division)
         reports = StudentReport.objects.filter(exam=exam).order_by('-average_marks')
         for position, report in enumerate(reports, start=1):
             report.position = position
@@ -448,7 +397,6 @@ def bulk_upload_results(request, exam_id):
         return redirect('academics:class_dashboard', pk=exam.class_room.id)
     return render(request, "academics/bulk_upload.html", {'exam': exam})
 
-# ========== REPORT VIEWS ==========
 def student_profile(request, pk):
     student = get_object_or_404(Student, pk=pk)
     reports = StudentReport.objects.filter(student=student).select_related('exam', 'exam__term', 'academic_year').order_by('-exam__term__academic_year__name', '-exam__term__id')
@@ -475,22 +423,13 @@ def report_detail(request, pk):
                 p.position = pos
                 break
     breakdown = ExamResult.objects.filter(student=student, exam=report.exam).select_related('subject').order_by('subject__name')
-    context = {
-        'report': report,
-        'student': student,
-        'progress_data': progress_data,
-        'breakdown': breakdown,
-        'academic_year': academic_year,
-        'class_room': class_room
-    }
-    return render(request, "academics/report_detail.html", context)
+    return render(request, "academics/report_detail.html", {'report': report, 'student': student, 'progress_data': progress_data, 'breakdown': breakdown, 'academic_year': academic_year, 'class_room': class_room})
 
 def report_list(request, pk):
     class_room = get_object_or_404(ClassRoom, pk=pk)
     academic_year = AcademicYear.objects.filter(is_active=True).first()
     reports = StudentReport.objects.filter(student__class_room=class_room, academic_year=academic_year).select_related('student', 'exam').order_by('student__last_name', 'exam__term__id')
-    context = {'class_room': class_room, 'reports': reports, 'academic_year': academic_year}
-    return render(request, "academics/report_list.html", context)
+    return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': reports, 'academic_year': academic_year})
 
 def generate_reports(request, class_id):
     class_room = get_object_or_404(ClassRoom, pk=class_id)
@@ -522,13 +461,7 @@ def generate_reports(request, class_id):
         avg = results.aggregate(Avg('average_marks'))['average_marks__avg'] or 0
         total_all = sum(all_points)
         StudentReport.objects.filter(student=student, exam=active_exam).delete()
-        StudentReport.objects.create(
-            student=student, exam=active_exam, academic_year=active_exam.term.academic_year,
-            total_marks=total, average_marks=avg,
-            total_points=total_all,
-            division_points=best_sum,
-            division=division
-        )
+        StudentReport.objects.create(student=student, exam=active_exam, academic_year=active_exam.term.academic_year, total_marks=total, average_marks=avg, total_points=total_all, division_points=best_sum, division=division)
     reports = StudentReport.objects.filter(exam=active_exam).order_by('-average_marks')
     for position, report in enumerate(reports, start=1):
         report.position = position
@@ -541,25 +474,16 @@ def bulk_print_class_reports(request, class_id, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     students = Student.objects.filter(class_room=class_room, status="ACTIVE", is_active=True).order_by('admission_number')
     result_data = []
-    level_group = class_room.level_group
     for student in students:
         report = StudentReport.objects.filter(student=student, exam=exam).first()
         subject_results = ExamResult.objects.filter(student=student, exam=exam).select_related('subject').order_by('subject__name')
         result_data.append({'student': student, 'report': report, 'subjects': subject_results})
-    context = {
-        'school_name': "YOUR SCHOOL NAME",
-        'class_room': class_room,
-        'exam': exam,
-        'result_data': result_data,
-        'level_group': level_group,
-    }
-    return render(request, 'academics/result_sheet.html', context)
+    return render(request, 'academics/result_sheet.html', {'school_name': "BABY A SCHOOL", 'class_room': class_room, 'exam': exam, 'result_data': result_data, 'level_group': class_room.level_group})
 
 def report_pdf(request, pk):
     messages.info(request, "PDF coming soon. Use Print button for now.")
     return redirect('academics:report_detail', pk=pk)
 
-# ========== WHATSAPP VIEWS ==========
 def send_results_to_parents(request, class_id, term_number):
     class_room = get_object_or_404(ClassRoom, id=class_id)
     academic_year = AcademicYear.objects.filter(is_active=True).first()
@@ -567,27 +491,21 @@ def send_results_to_parents(request, class_id, term_number):
         messages.error(request, "Hakuna Mwaka wa Masomo uliowekwa kuwa Active")
         return redirect('academics:class_dashboard', pk=class_id)
     term_map = {1: ["TERM1", "TERM 1"], 2: ["TERM2", "TERM 2"], 3: ["TERM3", "TERM 3"], 4: ["TERM4", "TERM 4"]}
-    term_names = term_map.get(term_number)
-    term = Term.objects.filter(academic_year=academic_year, name__in=term_names).first()
+    term = Term.objects.filter(academic_year=academic_year, name__in=term_map.get(term_number)).first()
     if not term:
-        messages.error(request, f"Term {term_names} haipatikani. Nenda Admin uunde Term ya '{term_names[0]}'")
+        messages.error(request, f"Term {term_number} haipatikani.")
         return redirect('academics:class_dashboard', pk=class_id)
     exams = Exam.objects.filter(term=term, class_room=class_room, is_active=True).order_by('id')
     if not exams.exists():
-        messages.error(request, f"Hakuna Exam iliyowekwa Active kwa {term.name} kwenye {class_room}")
+        messages.error(request, f"Hakuna Exam Active kwa {term.name} kwenye {class_room}")
         return redirect('academics:class_dashboard', pk=class_id)
     exam = exams.first()
-    reports = list(StudentReport.objects.filter(exam=exam, student__class_room=class_room).select_related('student', 'student__guardian').order_by('-average_marks'))
-    if not reports:
-        messages.error(request, f"Hakuna ripoti kwa {exam.name}. Kwanza fanya 'Bulk Upload' au 'Generate Reports'")
-        return redirect('academics:class_dashboard', pk=class_id)
+    reports = list(StudentReport.objects.filter(exam=exam, student__class_room=class_room).select_related('student').order_by('-average_marks'))
     total_students = len(reports)
     for pos, report in enumerate(reports, start=1):
         report.position = pos
-    term_label = {1: 'Midterm 1', 2: 'Terminal', 3: 'Midterm 2', 4: 'Annual'}.get(term_number)
     message_data = []
-    domain = "https://the-system-otxf.onrender.com" # FIXED: Hakuna /64/ tena
-
+    domain = "https://the-system-otxf.onrender.com"
     for report in reports:
         guardian = report.student.guardian
         if not guardian or not guardian.phone: continue
@@ -595,39 +513,16 @@ def send_results_to_parents(request, class_id, term_number):
         if phone.startswith('0'): phone = '255' + phone[1:]
         elif not phone.startswith('255'): phone = '255' + phone
         student_name = _get_student_name(report.student)
-        result_url = f"{domain}{reverse('academics:report_detail', args=[report.id])}" # FIXED: Link sahihi
-
-        message = f"""*BABY A SCHOOL*
-Ndugu mzazi wa {student_name}
-
-MATOKEO YA {term.name} {term_label}
-Nafasi: {report.position}/{total_students}
-Wastani: {report.average_marks:.2f}%
-
-*Tazama Ripoti Kamili:*
-{result_url}
-
-Asante."""
+        result_url = f"{domain}{reverse('academics:report_detail', args=[report.id])}"
+        message = f"*BABY A SCHOOL*\nMzazi wa {student_name}\nNafasi: {report.position}/{total_students}\nWastani: {report.average_marks:.2f}%\nLink: {result_url}"
         wa_link = f"https://wa.me/{phone}?text={quote(message)}"
         message_data.append({'name': student_name, 'phone': phone, 'message': message, 'link': wa_link})
-    context = {
-        'class_room': class_room,
-        'message_data': message_data,
-        'term_info': f"{term.name} {term_label}",
-        'total': len(message_data)
-    }
-    return render(request, 'academics/send_whatsapp.html', context)
+    return render(request, 'academics/send_whatsapp.html', {'class_room': class_room, 'message_data': message_data, 'term_info': f"{term.name}", 'total': len(message_data)})
 
 def send_whatsapp_page(request, class_id):
     class_room = get_object_or_404(ClassRoom, id=class_id)
-    links = request.session.get('whatsapp_links', [])
-    term_info = request.session.get('term_info', 'Results')
-    if not links:
-        messages.warning(request, "No links to send. Check errors above.")
-    context = {'class_room': class_room, 'links': links, 'term_info': term_info, 'total': len(links)}
-    return render(request, 'academics/send_whatsapp.html', context)
+    return render(request, 'academics/send_whatsapp.html', {'class_room': class_room, 'links': [], 'total': 0})
 
-# ========== MARKS ENTRY ==========
 @login_required
 def enter_marks(request, class_pk, exam_pk):
     class_room = get_object_or_404(ClassRoom, id=class_pk)
@@ -639,13 +534,7 @@ def enter_marks(request, class_pk, exam_pk):
             for subject in subjects:
                 test_marks = request.POST.get(f'test_{student.id}_{subject.id}', 0)
                 exam_marks = request.POST.get(f'exam_{student.id}_{subject.id}', 0)
-                ExamResult.objects.update_or_create(
-                    student=student,
-                    exam=exam,
-                    subject=subject,
-                    defaults={'test_marks': test_marks, 'exam_marks': exam_marks}
-                )
-        messages.success(request, 'Alama zimehifadhiwa kikamilifu!')
+                ExamResult.objects.update_or_create(student=student, exam=exam, subject=subject, defaults={'test_marks': test_marks, 'exam_marks': exam_marks})
+        messages.success(request, 'Alama zimehifadhiwa!')
         return redirect('academics:class_detail', pk=class_pk)
-    context = {'class_room': class_room, 'exam': exam, 'students': students, 'subjects': subjects}
-    return render(request, 'academics/enter_marks.html', context)
+    return render(request, 'academics/enter_marks.html', {'class_room': class_room, 'exam': exam, 'students': students, 'subjects': subjects})
