@@ -6,8 +6,8 @@ def home(request):
 def about(request):
     return render(request, 'website/about.html')
 
-def academics(request):
-    return render(request, 'website/academics.html')
+def programs(request):
+    return render(request, 'website/programs.html')
 
 def admission(request):
     return render(request, 'website/admission.html')
