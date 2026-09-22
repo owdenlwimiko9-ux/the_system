@@ -9,9 +9,9 @@ from urllib.parse import quote
 from django.utils import timezone
 import openpyxl
 
-from.models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
+from .models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
 from students.models import Student
-from.forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
+from .forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
 from accounts.views import is_teacher
 
 # ========== FORMS ==========
