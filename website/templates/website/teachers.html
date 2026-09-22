@@ -1,0 +1,17 @@
+{% extends 'base_public.html' %}
+{% block content %}
+<div style="background:#003366; color:white; padding:60px; text-align:center;">
+    <h1>Our Teachers</h1>
+    <p style="color:#FFD700;">Qualified, Experienced & Dedicated Staff</p>
+</div>
+<div style="padding:60px; display:grid; grid-template-columns:repeat(4,1fr); gap:25px; max-width:1200px; margin:auto;">
+    {% for i in "12345678" %}
+    <div style="background:white; border-radius:16px; padding:25px; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,0.05);">
+        <div style="width:80px; height:80px; background:#eef2ff; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:35px;">👨‍🏫</div>
+        <h5 style="color:#003366; margin:0;">Mr. Teacher {{forloop.counter}}</h5>
+        <p style="color:#2563eb; font-size:14px;">Mathematics / Science</p>
+        <p style="font-size:13px; color:gray;">BSc. Education - UDOM, 5+ Years Experience</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

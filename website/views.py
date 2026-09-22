@@ -4,19 +4,18 @@ def home(request):
     return render(request, 'website/home.html')
 
 def about(request):
-    return render(request, 'website/home.html')  # we will make about later
+    return render(request, 'website/about.html')
 
 def academics(request):
-    return render(request, 'website/home.html')
+    return render(request, 'website/academics.html')
 
 def admission(request):
-    return render(request, 'website/home.html')
+    return render(request, 'website/admission.html')
 
 def teachers(request):
-    return render(request, 'website/home.html')
+    return render(request, 'website/teachers.html')
 
 def school_management(request):
-    # THIS IS THE CONNECTION TO YOUR SYSTEM
     if not request.user.is_authenticated:
-        return redirect('login')  # goes to your templates/registration/login.html
-    return redirect('dashboard:home')  # goes to your sidebar system
+        return redirect('login')
+    return redirect('dashboard:home')

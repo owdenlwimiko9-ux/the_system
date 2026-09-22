@@ -1,0 +1,21 @@
+{% extends 'base_public.html' %}
+{% block content %}
+<div style="background:#003366; color:white; padding:60px; text-align:center;">
+    <h1>Academics</h1>
+    <p style="color:#FFD700;">Pre-Primary • Primary • Secondary (Form 1-6)</p>
+</div>
+<div style="padding:60px; display:grid; grid-template-columns:repeat(3,1fr); gap:30px;">
+    <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 5px 20px rgba(0,0,0,0.08);">
+        <div style="background:#FFD700; padding:20px; text-align:center; color:#003366; font-weight:bold; font-size:20px;">PRE-PRIMARY</div>
+        <div style="padding:25px;"><p>Baby Class, Middle, Pre-Unit. Play-based learning, early literacy, numbers.</p><ul><li>Age 3-6 years</li><li>Montessori + NECTA</li><li>English & Swahili</li></ul></div>
+    </div>
+    <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 5px 20px rgba(0,0,0,0.08);">
+        <div style="background:#2563eb; padding:20px; text-align:center; color:white; font-weight:bold; font-size:20px;">PRIMARY</div>
+        <div style="padding:25px;"><p>Standard I - VII, NECTA curriculum, strong foundation for PSLE.</p><ul><li>Mathematics, Science, English</li><li>Computer Lessons</li><li>Clubs & Sports</li></ul></div>
+    </div>
+    <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 5px 20px rgba(0,0,0,0.08);">
+        <div style="background:#003366; padding:20px; text-align:center; color:white; font-weight:bold; font-size:20px;">SECONDARY</div>
+        <div style="padding:25px;"><p>Form I - VI, O-Level & A-Level, Science, Arts & Commerce.</p><ul><li>PCB, PCM, HGL, HGK</li><li>Lab & Library</li><li>NECTA + NECTA Results Tracking in System</li></ul></div>
+    </div>
+</div>
+{% endblock %}
