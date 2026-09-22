@@ -9,21 +9,22 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # 1. PUBLIC WEBSITE - /
-    path('', include('website.urls')),
-    # redirect old /academics/ public link
-    path('academics/', RedirectView.as_view(url='/programs/', permanent=True)),
-    
-    # 2. AUTH
+    # 2. AUTH - MUST be before website
     path('login/', RoleBasedLoginView.as_view(), name='login'), 
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
-    
-    # 3. PRIVATE SYSTEM - all under school-management/
+
+    # 3. PRIVATE SYSTEM
     path('school-management/', include('dashboard.urls')),
     path('school-management/students/', include('students.urls')),
     path('school-management/academics/', include('academics.urls')),
     path('school-management/finance/', include('finance.urls')),
     path('accounts/', include('accounts.urls')),
+
+    # Redirect old link - NOT permanent
+    path('academics/', RedirectView.as_view(url='/programs/', permanent=False)),
+    
+    # 1. PUBLIC WEBSITE - LAST
+    path('', include('website.urls')),
 ]
 
 if settings.DEBUG:
