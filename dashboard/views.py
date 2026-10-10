@@ -4,7 +4,6 @@ from django.db import connection
 from students.models import Student
 from django.contrib.auth.decorators import user_passes_test
 from academics.models import ClassRoom, Subject, Teacher, AcademicYear, Term, Exam, ExamResult, StudentReport
-# === FIXED: your app is home, not website ===
 from website.models import AdmissionApplication
 
 def superuseruser_requred(user):
@@ -16,17 +15,13 @@ def dashboard_view(request):
     total_classes = ClassRoom.objects.count()
     total_teachers = Teacher.objects.count()
     total_subjects = Subject.objects.count()
-
     students_per_class = ClassRoom.objects.annotate(student_count=Count('students')).order_by('level', 'stream')
-
     db_engine = connection.settings_dict['ENGINE']
     db_name = "PostgreSQL" if 'postgresql' in db_engine else "SQLite"
-
     current_year = AcademicYear.objects.filter(is_active=True).first()
     exam_performance = []
     active_exam_name = "None"
     total_reports = 0
-
     if current_year:
         exams = Exam.objects.filter(term__academic_year=current_year).order_by('-id')[:4]
         total_reports = StudentReport.objects.filter(exam__term__academic_year=current_year).count()
@@ -37,33 +32,14 @@ def dashboard_view(request):
                 pass_count = exam_results.filter(average_marks__gte=40).count()
                 total_papers = exam_results.count()
                 pass_percentage = (pass_count / total_papers * 100) if total_papers > 0 else 0
-                exam_performance.append({
-                    'name': exam.name,
-                    'term': exam.term.name,
-                    'avg_score': round(avg_score, 2),
-                    'pass_percentage': round(pass_percentage, 2),
-                    'total_students': total_papers
-                })
+                exam_performance.append({'name': exam.name, 'term': exam.term.name, 'avg_score': round(avg_score, 2), 'pass_percentage': round(pass_percentage, 2), 'total_students': total_papers})
         if exams:
             active_exam_name = exams[0].name
 
     pending_admissions = AdmissionApplication.objects.filter(status='Pending').count()
     latest_admissions = AdmissionApplication.objects.order_by('-created_at')[:5]
 
-    context = {
-        'total_students': total_students,
-        'total_classes': total_classes,
-        'total_teachers': total_teachers,
-        'total_subjects': total_subjects,
-        'students_per_class': students_per_class,
-        'exam_performance': exam_performance,
-        'total_reports': total_reports,
-        'active_exam_name': active_exam_name,
-        'current_year': current_year,
-        'db_name': db_name,
-        'pending_admissions': pending_admissions,
-        'latest_admissions': latest_admissions,
-    }
+    context = {'total_students': total_students, 'total_classes': total_classes, 'total_teachers': total_teachers, 'total_subjects': total_subjects, 'students_per_class': students_per_class, 'exam_performance': exam_performance, 'total_reports': total_reports, 'active_exam_name': active_exam_name, 'current_year': current_year, 'db_name': db_name, 'pending_admissions': pending_admissions, 'latest_admissions': latest_admissions}
     return render(request, 'dashboard/main_dashboard.html', context)
 
 @user_passes_test(superuseruser_requred, login_url='/')
