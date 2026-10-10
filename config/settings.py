@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "import_export",
     "finance",
     'website',
+    'admissions',
     "django.contrib.humanize",
     "django.contrib.admin",
     "django.contrib.auth",

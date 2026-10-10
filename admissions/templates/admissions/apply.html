@@ -1,0 +1,16 @@
+{% extends 'website/base.html' %}
+{% block content %}
+<div class="container py-5">
+<h2>Admission Application</h2>
+{% if messages %}{% for m in messages %}<div class="alert alert-success">{{m}}</div>{% endfor %}{% endif %}
+<form method="post">{% csrf_token %}
+<input class="form-control mb-2" name="full_name" placeholder="Student Full Name" required>
+<input class="form-control mb-2" name="parent_name" placeholder="Parent Name">
+<input class="form-control mb-2" name="parent_phone" placeholder="Parent Phone" required>
+<input class="form-control mb-2" name="class_applying" placeholder="Class Applying For" required>
+<input class="form-control mb-2" name="previous_school" placeholder="Previous School">
+<textarea class="form-control mb-2" name="message" placeholder="Message"></textarea>
+<button class="btn btn-primary">Submit Application</button>
+</form>
+</div>
+{% endblock %}

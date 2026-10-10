@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h3>Admissions</h3>
+<table class="table">
+<tr><th>Name</th><th>Class</th><th>Phone</th><th>Date</th><th>Status</th><th>Action</th></tr>
+{% for a in applications %}
+<tr>
+<td>{{a.full_name}}</td><td>{{a.class_applying}}</td><td>{{a.parent_phone}}</td><td>{{a.created_at|date:"d M Y"}}</td><td>{{a.status}}</td>
+<td>
+{% if a.status == 'Pending' %}
+<a href="{% url 'admissions:approve' a.id %}" class="btn btn-sm btn-success">Approve</a>
+<a href="{% url 'admissions:reject' a.id %}" class="btn btn-sm btn-danger">Reject</a>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -25,6 +25,7 @@ urlpatterns = [
     
     # 1. PUBLIC WEBSITE - LAST
     path('', include('website.urls')),
+    path('admissions/', include('admissions.urls')),
 ]
 
 if settings.DEBUG:
