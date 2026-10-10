@@ -31,15 +31,20 @@ def dashboard_view(request):
                 pass_count = exam_results.filter(average_marks__gte=40).count()
                 total_papers = exam_results.count()
                 pass_percentage = (pass_count / total_papers * 100) if total_papers > 0 else 0
-                exam_performance.append({
-                    'name': exam.name,
-                    'term': exam.term.name,
-                    'avg_score': round(avg_score, 2),
-                    'pass_percentage': round(pass_percentage, 2),
-                    'total_students': total_papers
-                })
+                exam_performance.append({'name': exam.name, 'term': exam.term.name, 'avg_score': round(avg_score, 2), 'pass_percentage': round(pass_percentage, 2), 'total_students': total_papers})
         if exams:
             active_exam_name = exams[0].name
+
+    # SAFE admissions - will never break dashboard
+    pending_admissions = 0
+    latest_admissions = []
+    try:
+        from admissions.models import AdmissionApplication
+        pending_admissions = AdmissionApplication.objects.filter(status='Pending').count()
+        latest_admissions = AdmissionApplication.objects.filter(status='Pending').order_by('-created_at')[:3]
+    except:
+        pending_admissions = 0
+        latest_admissions = []
 
     context = {
         'total_students': total_students,
@@ -52,5 +57,7 @@ def dashboard_view(request):
         'active_exam_name': active_exam_name,
         'current_year': current_year,
         'db_name': db_name,
+        'pending_admissions': pending_admissions,
+        'latest_admissions': latest_admissions,
     }
     return render(request, 'dashboard/main_dashboard.html', context)
