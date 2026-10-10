@@ -81,9 +81,23 @@ def calculate_best_points(all_points, level_group):
 def _get_student_name(student):
     return f"{student.first_name} {student.middle_name or ''} {student.last_name}".strip()
 
+def _safe_student_count(class_room):
+    """Get student count without crashing"""
+    try:
+        return class_room.students.filter(status="ACTIVE", is_active=True).count()
+    except:
+        try:
+            return class_room.student_set.filter(status="ACTIVE", is_active=True).count()
+        except:
+            return 0
+
 # ========== DASHBOARD ==========
 @login_required
 def class_list(request):
+    classes = ClassRoom.objects.all().order_by('level', 'stream')
+    for c in classes:
+        c.student_count = _safe_student_count(c)
+
     context = {
         'classes_count': ClassRoom.objects.count(),
         'students_count': Student.objects.filter(status="ACTIVE", is_active=True).count(),
@@ -91,9 +105,7 @@ def class_list(request):
         'subjects_count': Subject.objects.count(),
         'exams_count': Exam.objects.count(),
         'active_year': AcademicYear.objects.filter(is_active=True).first(),
-        'classes': ClassRoom.objects.select_related('class_teacher').annotate(
-            student_count=Count('students', filter=Q(students__status="ACTIVE", students__is_active=True))
-        ).order_by('level', 'stream')
+        'classes': classes
     }
     return render(request, "academics/class_list.html", context)
 
@@ -107,8 +119,12 @@ def class_create(request):
     return render(request, "academics/class_form.html", {'form': form, 'title': 'Add Class'})
 
 def class_dashboard(request, pk):
-    cls = get_object_or_404(ClassRoom.objects.select_related('class_teacher'), pk=pk)
-    students = cls.students.filter(status="ACTIVE", is_active=True).order_by('first_name')
+    cls = get_object_or_404(ClassRoom, pk=pk)
+    try:
+        students = cls.students.filter(status="ACTIVE", is_active=True).order_by('first_name')
+    except:
+        students = Student.objects.filter(class_room=cls, status="ACTIVE", is_active=True).order_by('first_name')
+
     subjects = Subject.objects.filter(class_room=cls).select_related('teacher')
     academic_year = AcademicYear.objects.filter(is_active=True).first()
     context = {'cls': cls, 'students': students, 'subjects': subjects, 'student_count': students.count(), 'subject_count': subjects.count(), 'academic_year': academic_year}
@@ -120,13 +136,13 @@ def class_overview(request, class_id):
     subjects = Subject.objects.filter(class_room=class_room)
     academic_year = AcademicYear.objects.filter(is_active=True).first()
     teachers = Teacher.objects.filter(subjects__in=subjects).distinct()
-    exams = Exam.objects.filter(class_room=class_room, term__academic_year=academic_year).select_related('term').order_by('term__id', 'id')
-    latest_exam = exams.last()
+    exams = Exam.objects.filter(class_room=class_room, term__academic_year=academic_year).select_related('term').order_by('term__id', 'id') if academic_year else Exam.objects.filter(class_room=class_room).select_related('term').order_by('term__id', 'id')
+    latest_exam = exams.last() if exams else None
     term_mapping = {1: "TERM 1", 2: "TERM 2", 3: "TERM 3", 4: "TERM 4"}
     term_exams = {}
     for term_num, term_label in term_mapping.items():
         term_exams[term_label] = []
-        for exam in [e for e in exams if e.term.id == term_num]:
+        for exam in [e for e in exams if e.term and e.term.id == term_num]:
             reports = StudentReport.objects.filter(exam=exam).select_related('student').order_by('-average_marks')
             for pos, r in enumerate(reports, 1):
                 r.position = pos
@@ -150,10 +166,10 @@ def year_create(request):
     if request.method == "POST":
         form = AcademicYearForm(request.POST)
         if form.is_valid():
-            if form.cleaned_data['is_active']:
+            if form.cleaned_data.get('is_active'):
                 AcademicYear.objects.update(is_active=False)
             year = form.save()
-            messages.success(request, f"Academic Year {year.name} created!")
+            messages.success(request, f"Academic Year {year} created!")
             return redirect('academics:year_list')
     else:
         form = AcademicYearForm()
@@ -164,10 +180,10 @@ def year_update(request, pk):
     if request.method == "POST":
         form = AcademicYearForm(request.POST, instance=year)
         if form.is_valid():
-            if form.cleaned_data['is_active']:
+            if form.cleaned_data.get('is_active'):
                 AcademicYear.objects.exclude(pk=pk).update(is_active=False)
             form.save()
-            messages.success(request, f"Academic Year {year.name} updated!")
+            messages.success(request, f"Academic Year {year} updated!")
             return redirect('academics:year_list')
     else:
         form = AcademicYearForm(instance=year)
@@ -178,7 +194,7 @@ def year_activate(request, pk):
     year = get_object_or_404(AcademicYear, pk=pk)
     year.is_active = True
     year.save()
-    messages.success(request, f"{year.name} is now Active")
+    messages.success(request, f"{year} is now Active")
     return redirect('academics:year_list')
 
 # ========== TERM VIEWS ==========
@@ -186,10 +202,14 @@ def term_list(request):
     terms = Term.objects.select_related('academic_year').all().order_by('-start_date')
     today = timezone.now().date()
     for t in terms:
-        t.total_days = (t.end_date - t.start_date).days + 1
-        t.days_passed = (today - t.start_date).days + 1
-        if t.days_passed < 0: t.days_passed = 0
-        if t.days_passed > t.total_days: t.days_passed = t.total_days
+        try:
+            t.total_days = (t.end_date - t.start_date).days + 1
+            t.days_passed = (today - t.start_date).days + 1
+            if t.days_passed < 0: t.days_passed = 0
+            if t.days_passed > t.total_days: t.days_passed = t.total_days
+        except:
+            t.total_days = 0
+            t.days_passed = 0
     return render(request, 'academics/term_list.html', {'terms': terms})
 
 def term_create(request):
@@ -252,7 +272,16 @@ def subject_delete(request, pk):
 
 # ========== TEACHER VIEWS ==========
 def teacher_list(request):
-    teachers = Teacher.objects.all().annotate(subject_count=Count('subjects', distinct=True), classroom_count=Count('classrooms', distinct=True))
+    teachers = Teacher.objects.all()
+    for t in teachers:
+        try:
+            t.subject_count = t.subjects.count()
+        except:
+            t.subject_count = 0
+        try:
+            t.classroom_count = t.classrooms.count()
+        except:
+            t.classroom_count = 0
     return render(request, 'academics/teacher_list.html', {'teachers': teachers, 'subjects_count': Subject.objects.count(), 'classes_count': ClassRoom.objects.count()})
 
 def teacher_detail(request, pk):
@@ -286,7 +315,7 @@ def teacher_dashboard(request):
     teacher = Teacher.objects.filter(email=request.user.email).first()
     if not teacher:
         return render(request, 'academics/no_teacher_profile.html')
-    my_classes = ClassRoom.objects.filter(class_teacher=teacher)
+    my_classes = ClassRoom.objects.filter(class_teacher=teacher) if hasattr(ClassRoom, 'class_teacher') else ClassRoom.objects.none()
     my_subjects = Subject.objects.filter(teacher=teacher).select_related('class_room')
     active_exams = Exam.objects.filter(is_active=True)
     return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_classes': my_classes, 'my_subjects': my_subjects, 'active_exams': active_exams})
@@ -362,15 +391,19 @@ def bulk_upload_results(request, exam_id):
             col_index = 2
             ExamResult.objects.filter(student=student, exam=exam).delete()
             for subject in subjects:
-                test_marks = float(row[col_index]) if row[col_index] not in [None, ''] else 0
-                exam_marks = float(row[col_index + 1]) if row[col_index + 1] not in [None, ''] else 0
+                try:
+                    test_marks = float(row[col_index]) if row[col_index] not in [None, ''] else 0
+                    exam_marks = float(row[col_index + 1]) if row[col_index + 1] not in [None, ''] else 0
+                except:
+                    test_marks = 0
+                    exam_marks = 0
                 col_index += 2
                 ExamResult.objects.create(student=student, exam=exam, subject=subject, test_marks=test_marks, exam_marks=exam_marks)
             results = ExamResult.objects.filter(student=student, exam=exam)
             all_points = []
             points_for_best = []
             for result in results:
-                avg = float(result.average_marks)
+                avg = float(result.average_marks or 0)
                 if exam.class_room.level_group == 'ORDINARY':
                     p = get_ordinary_points(avg)
                     result.points = p
@@ -428,7 +461,7 @@ def report_detail(request, pk):
 def report_list(request, pk):
     class_room = get_object_or_404(ClassRoom, pk=pk)
     academic_year = AcademicYear.objects.filter(is_active=True).first()
-    reports = StudentReport.objects.filter(student__class_room=class_room, academic_year=academic_year).select_related('student', 'exam').order_by('student__last_name', 'exam__term__id')
+    reports = StudentReport.objects.filter(student__class_room=class_room, academic_year=academic_year).select_related('student', 'exam').order_by('student__last_name', 'exam__term__id') if academic_year else StudentReport.objects.filter(student__class_room=class_room).select_related('student', 'exam').order_by('student__last_name', 'exam__term__id')
     return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': reports, 'academic_year': academic_year})
 
 def generate_reports(request, class_id):
@@ -443,7 +476,7 @@ def generate_reports(request, class_id):
         all_points = []
         points_for_best = []
         for result in results:
-            avg = float(result.average_marks)
+            avg = float(result.average_marks or 0)
             if class_room.level_group == 'ORDINARY':
                 p = get_ordinary_points(avg)
                 result.points = p
@@ -532,8 +565,8 @@ def enter_marks(request, class_pk, exam_pk):
     if request.method == 'POST':
         for student in students:
             for subject in subjects:
-                test_marks = request.POST.get(f'test_{student.id}_{subject.id}', 0)
-                exam_marks = request.POST.get(f'exam_{student.id}_{subject.id}', 0)
+                test_marks = request.POST.get(f'test_{student.id}_{subject.id}', 0) or 0
+                exam_marks = request.POST.get(f'exam_{student.id}_{subject.id}', 0) or 0
                 ExamResult.objects.update_or_create(student=student, exam=exam, subject=subject, defaults={'test_marks': test_marks, 'exam_marks': exam_marks})
         messages.success(request, 'Alama zimehifadhiwa!')
         return redirect('academics:class_detail', pk=class_pk)
