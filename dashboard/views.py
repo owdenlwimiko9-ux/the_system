@@ -1,10 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.db.models import Count, Avg
 from django.db import connection
 from students.models import Student
 from django.contrib.auth.decorators import user_passes_test
-from academics.models import ClassRoom, Subject, Teacher, AcademicYear, Term, Exam, ExamResult, StudentReport
-from website.models import AdmissionApplication
+from academics.models import ClassRoom, Subject, Teacher, AcademicYear, Exam, ExamResult, StudentReport
 
 def superuseruser_requred(user):
     return user.is_superuser
@@ -32,31 +31,26 @@ def dashboard_view(request):
                 pass_count = exam_results.filter(average_marks__gte=40).count()
                 total_papers = exam_results.count()
                 pass_percentage = (pass_count / total_papers * 100) if total_papers > 0 else 0
-                exam_performance.append({'name': exam.name, 'term': exam.term.name, 'avg_score': round(avg_score, 2), 'pass_percentage': round(pass_percentage, 2), 'total_students': total_papers})
+                exam_performance.append({
+                    'name': exam.name,
+                    'term': exam.term.name,
+                    'avg_score': round(avg_score, 2),
+                    'pass_percentage': round(pass_percentage, 2),
+                    'total_students': total_papers
+                })
         if exams:
             active_exam_name = exams[0].name
 
-    pending_admissions = AdmissionApplication.objects.filter(status='Pending').count()
-    latest_admissions = AdmissionApplication.objects.order_by('-created_at')[:5]
-
-    context = {'total_students': total_students, 'total_classes': total_classes, 'total_teachers': total_teachers, 'total_subjects': total_subjects, 'students_per_class': students_per_class, 'exam_performance': exam_performance, 'total_reports': total_reports, 'active_exam_name': active_exam_name, 'current_year': current_year, 'db_name': db_name, 'pending_admissions': pending_admissions, 'latest_admissions': latest_admissions}
+    context = {
+        'total_students': total_students,
+        'total_classes': total_classes,
+        'total_teachers': total_teachers,
+        'total_subjects': total_subjects,
+        'students_per_class': students_per_class,
+        'exam_performance': exam_performance,
+        'total_reports': total_reports,
+        'active_exam_name': active_exam_name,
+        'current_year': current_year,
+        'db_name': db_name,
+    }
     return render(request, 'dashboard/main_dashboard.html', context)
-
-@user_passes_test(superuseruser_requred, login_url='/')
-def admission_list_view(request):
-    applications = AdmissionApplication.objects.all().order_by('-created_at')
-    return render(request, 'dashboard/admission_list.html', {'applications': applications})
-
-@user_passes_test(superuseruser_requred, login_url='/')
-def admission_approve(request, id):
-    app = get_object_or_404(AdmissionApplication, id=id)
-    app.status = 'Approved'
-    app.save()
-    return redirect('dashboard:admission_list')
-
-@user_passes_test(superuseruser_requred, login_url='/')
-def admission_reject(request, id):
-    app = get_object_or_404(AdmissionApplication, id=id)
-    app.status = 'Rejected'
-    app.save()
-    return redirect('dashboard:admission_list')
