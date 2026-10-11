@@ -96,6 +96,15 @@ def class_create(request):
         return redirect('academics:class_list')
     return render(request, "academics/class_form.html", {'form': form, 'title': 'Add Class'})
 
+def class_update(request, pk):
+    cls = get_object_or_404(ClassRoom, pk=pk)
+    form = ClassRoomForm(request.POST or None, instance=cls)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Class updated successfully')
+        return redirect('academics:class_list')
+    return render(request, "academics/class_form.html", {'form': form, 'title': 'Edit Class'})
+
 def class_dashboard(request, pk):
     cls = get_object_or_404(ClassRoom, pk=pk)
     students = Student.objects.filter(class_room=cls).order_by('first_name')
