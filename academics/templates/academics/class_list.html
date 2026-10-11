@@ -41,11 +41,11 @@
     <div class="col-md-6 col-lg-4">
         <div class="card academic-card h-100 shadow-sm">
             <div class="card-body">
-                <h5 class="fw-bold">{{ cls.get_level_display }} - {{ cls.stream }}</h5>
-                <span class="badge bg-secondary mb-2">{{ cls.level_group }}</span>
+                <h5 class="fw-bold">{{ cls.get_level_display|default:cls.level }} - {{ cls.stream|default:"" }}</h5>
+                <span class="badge bg-secondary mb-2">{{ cls.level_group|default:"" }}</span>
                 
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="badge bg-info">{{ cls.student_count }} Students</span>
+                    <span class="badge bg-info">{{ cls.student_count|default:0 }} Students</span>
                     {% if cls.class_teacher %}
                         <small class="text-muted"><i class="bi bi-person-check"></i> {{ cls.class_teacher.last_name }}</small>
                     {% else %}
@@ -54,17 +54,17 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <a href="{% url 'academics:class_overview' cls.id %}" class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'academics:class_overview' class_id=cls.id %}" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-speedometer2"></i> Class Exams Reports
                     </a>
-                    <a href="{% url 'academics:class_dashboard' cls.id %}" class="btn btn-sm btn-outline-success">
+                    <a href="{% url 'academics:class_dashboard' pk=cls.id %}" class="btn btn-sm btn-outline-success">
                         <i class="bi bi-people"></i> Students in Class
                     </a>
                 </div>
 
                 <hr class="my-2">
                 <div class="d-flex gap-2">
-                    <a href="{% url 'academics:class_update' cls.pk %}" class="btn btn-sm btn-warning flex-grow-1">
+                    <a href="{% url 'academics:class_update' pk=cls.id %}" class="btn btn-sm btn-warning flex-grow-1">
                         <i class="bi bi-pencil"></i> Edit
                     </a>
                 </div>
