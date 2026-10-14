@@ -16,7 +16,7 @@ def apply(request):
             previous_school=request.POST.get('previous_school',''),
             message=request.POST.get('message','')
         )
-        return redirect('admissions_status', code=app.application_code)
+        return redirect('admissions:status', code=app.application_code)
     return render(request, 'admissions/apply.html')
 
 def status(request, code):
@@ -30,29 +30,23 @@ def track(request):
         result = AdmissionApplication.objects.filter(parent_phone__icontains=phone).order_by('-created_at')
     return render(request, 'admissions/track.html', {'result': result})
 
-# --- NEW MANAGE VIEWS ---
 @user_passes_test(superuser_required, login_url='/')
 def manage_list(request):
     applications = AdmissionApplication.objects.all().order_by('-created_at')
     return render(request, 'admissions/manage_list.html', {'applications': applications})
 
 @user_passes_test(superuser_required, login_url='/')
-def manage_detail(request, pk):
-    app = get_object_or_404(AdmissionApplication, pk=pk)
-    return render(request, 'admissions/manage_detail.html', {'app': app})
-
-@user_passes_test(superuser_required, login_url='/')
-def manage_approve(request, pk):
-    app = get_object_or_404(AdmissionApplication, pk=pk)
+def approve(request, id):
+    app = get_object_or_404(AdmissionApplication, id=id)
     app.status = 'Approved'
     app.save()
     messages.success(request, f'{app.full_name} Approved')
-    return redirect('admissions_manage')
+    return redirect('admissions:manage')
 
 @user_passes_test(superuser_required, login_url='/')
-def manage_reject(request, pk):
-    app = get_object_or_404(AdmissionApplication, pk=pk)
+def reject(request, id):
+    app = get_object_or_404(AdmissionApplication, id=id)
     app.status = 'Rejected'
     app.save()
     messages.success(request, f'{app.full_name} Rejected')
-    return redirect('admissions_manage')
+    return redirect('admissions:manage')
