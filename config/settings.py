@@ -7,13 +7,19 @@ from pathlib import Path
 import os
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-3s3eq04o)zlbmecy6j6&)zcr-f=8^!^#xm2l_ug__+ys-zdpct')
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true' 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'the-system-otxf.onrender.com', '.onrender.com']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://the-system-otxf.onrender.com',
+    'https://*.onrender.com',
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # APPLICATION DEFINITION
 INSTALLED_APPS = [
@@ -124,3 +130,5 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
