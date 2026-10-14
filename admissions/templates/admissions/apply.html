@@ -1,21 +1,26 @@
 {% extends 'base_public.html' %}
 {% block content %}
-<div class="container py-5" style="max-width:600px;">
-<div style="background:white; padding:30px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;">
-<h2 style="color:#0c152d; font-weight:bold;">Admission Application</h2>
-{% if messages %}{% for m in messages %}<div class="alert alert-success">{{m}}</div>{% endfor %}{% endif %}
-<form method="post">{% csrf_token %}
-<input class="form-control mb-2" name="full_name" placeholder="Student Full Name" required>
-<input class="form-control mb-2" name="parent_name" placeholder="Parent Name" required>
-<input class="form-control mb-2" name="parent_phone" placeholder="Parent Phone" required>
-<select class="form-control mb-2" name="class_applying" required>
-<option value="">Select Class</option>
-<option>Baby Class</option><option>Pre-Primary</option><option>Primary</option><option>Form 1-4</option><option>Form 5-6</option>
-</select>
-<input class="form-control mb-2" name="previous_school" placeholder="Previous School">
-<textarea class="form-control mb-2" name="message" placeholder="Message"></textarea>
-<button class="btn w-100" style="background:#0c152d; color:#FFD700; font-weight:bold;">Submit Application</button>
-</form>
+<div style="background:#0c152d; padding:50px 20px; text-align:center; color:white;">
+    <h1>Admission 2026</h1>
+    <p>Secure your child's future at KILAMSA</p>
 </div>
+<div class="container py-5" style="max-width:700px;">
+    <div style="background:white; padding:35px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.1);">
+        <form method="post">{% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Student Name *</label><input name="full_name" class="form-control" required></div>
+                <div class="col-md-6 mb-3"><label>Parent Name *</label><input name="parent_name" class="form-control" required></div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label>Parent Phone *</label><input name="parent_phone" class="form-control" required placeholder="07XX XXX XXX"></div>
+                <div class="col-md-6 mb-3"><label>Class Applying *</label>
+                <select name="class_applying" class="form-select" required><option value="">Select</option><option>Baby Class</option><option>Pre-Primary</option><option>Primary</option><option>Form 1-4</option><option>Form 5-6</option></select></div>
+            </div>
+            <div class="mb-3"><label>Previous School</label><input name="previous_school" class="form-control"></div>
+            <div class="mb-3"><label>Message</label><textarea name="message" class="form-control" rows="2"></textarea></div>
+            <button class="btn w-100" style="background:#0c152d; color:#FFD700; font-weight:bold; padding:12px;">Submit Application</button>
+        </form>
+        <p class="text-center mt-3"><a href="/admissions/track/">Already applied? Track your status →</a></p>
+    </div>
 </div>
 {% endblock %}

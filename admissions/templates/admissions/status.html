@@ -1,0 +1,20 @@
+{% extends 'base_public.html' %}
+{% block content %}
+<div class="container py-5" style="max-width:600px; text-align:center;">
+    <div style="background:white; padding:40px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.1);">
+        <h2 style="color:#16a34a;"><i class="bi bi-check-circle-fill"></i> Application Received</h2>
+        <h4 class="mt-3">{{ app.full_name }}</h4>
+        <p>Code: <b style="font-size:20px; letter-spacing:2px;">{{ app.application_code }}</b></p>
+        <p>Class: {{ app.class_applying }}</p>
+        <hr>
+        <p>Status: 
+        {% if app.status == 'pending' %}<span class="badge bg-warning text-dark">Pending Review</span>
+        {% elif app.status == 'approved' %}<span class="badge bg-success">Approved - Welcome!</span>
+        {% elif app.status == 'interview' %}<span class="badge bg-info">Called for Interview</span>
+        {% else %}<span class="badge bg-danger">Rejected</span>{% endif %}
+        </p>
+        <p class="text-muted small mt-4">Save this code to track your application: /admissions/track/</p>
+        <a href="/admissions/track/" class="btn btn-dark mt-2">Track Application</a>
+    </div>
+</div>
+{% endblock %}

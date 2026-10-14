@@ -25,31 +25,33 @@
             Email: admission@kilamsa.ac.tz
             </span>
             <div style="margin-top:15px;">
-                <a href="/login/" target="_blank" rel="noopener" style="text-decoration:none; background:#0c152d; color:white; padding:8px 16px; border-radius:8px; font-size:13px;">Open System →</a>
+                <a href="/login/" style="text-decoration:none; background:#0c152d; color:white; padding:8px 16px; border-radius:8px; font-size:13px;">Open System →</a>
             </div>
         </div>
+        {% if messages %}
+            {% for m in messages %}<div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; margin-top:20px;">{{ m }}</div>{% endfor %}
+        {% endif %}
     </div>
 
     <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;">
         <h4 style="color:#0c152d; font-weight:bold;">Apply Now</h4>
-        <form method="post" style="margin-top:15px;">
+        <form method="post" action="/admissions/apply/" style="margin-top:15px;">
             {% csrf_token %}
             <input type="text" name="full_name" placeholder="Student Full Name" required style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd;">
+            <input type="text" name="parent_name" placeholder="Parent Name" required style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd;">
             <input type="text" name="parent_phone" placeholder="Parent Phone" required style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd;">
-            <select name="class_name" required style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd;">
+            <select name="class_applying" required style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd;">
                 <option value="">Select Class</option>
-                <option>Baby Class</option>
-                <option>Pre-Primary</option>
-                <option>Primary (1-7)</option>
-                <option>Form 1-4</option>
-                <option>Form 5-6</option>
+                <option value="Baby Class">Baby Class</option>
+                <option value="Pre-Primary">Pre-Primary</option>
+                <option value="Primary">Primary (1-7)</option>
+                <option value="Form 1-4">Form 1-4</option>
+                <option value="Form 5-6">Form 5-6</option>
             </select>
+            <textarea name="message" placeholder="Previous School / Message" style="width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #ddd; height:80px;"></textarea>
             <button type="submit" style="width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none; border-radius:8px; font-weight:bold; margin-top:12px; cursor:pointer;">Submit Application</button>
         </form>
-        <p style="font-size:11px; text-align:center; margin-top:12px; color:#94a3b8;">This form will save to your Students module (we will connect it next)</p>
-        <p style="font-size:12px; text-align:center; margin-top:8px;">
-            Already have account? <a href="/login/" target="_blank" rel="noopener" style="color:#2563eb; font-weight:bold;">Go to System</a>
-        </p>
+        <p style="font-size:11px; text-align:center; margin-top:12px; color:#94a3b8;">Application goes directly to admin dashboard</p>
     </div>
 </div>
 {% endblock %}

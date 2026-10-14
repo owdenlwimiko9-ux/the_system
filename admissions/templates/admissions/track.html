@@ -1,0 +1,21 @@
+{% extends 'base_public.html' %}
+{% block content %}
+<div class="container py-5" style="max-width:600px;">
+    <h3 class="text-center">Track Application</h3>
+    <form method="post" class="mt-4" style="background:white; padding:25px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.05);">{% csrf_token %}
+        <input name="phone" class="form-control mb-3" placeholder="Enter Parent Phone Number" required>
+        <button class="btn w-100" style="background:#0c152d; color:white;">Search</button>
+    </form>
+    {% if result %}
+    <div class="mt-4">
+        {% for app in result %}
+        <div style="background:white; padding:15px; border-radius:10px; margin-bottom:10px; border-left:4px solid #FFD700;">
+            <b>{{ app.full_name }}</b> - {{ app.application_code }}<br>
+            <small>{{ app.class_applying }} | {{ app.status|upper }} | {{ app.created_at|date:"d M Y" }}</small><br>
+            <a href="/admissions/status/{{ app.application_code }}/">View Details →</a>
+        </div>
+        {% empty %}<p class="text-center mt-3">No application found with that phone.</p>{% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
