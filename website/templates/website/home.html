@@ -1,124 +1,58 @@
 {% extends 'base_public.html' %}
 {% block content %}
+{% block body %}
+
 <style>
-.hero{
-  background:linear-gradient(135deg, #0c152d 0%, #1e293b 100%);
-  color:white; padding:60px 20px; text-align:center;
-}
-.btn-gold{
-  background:#FFD700; color:#0c152d; padding:12px 24px; border-radius:10px;
-  font-weight:bold; text-decoration:none; display:inline-block;
-}
-.btn-blue{
-  background:#2563eb; color:white; padding:12px 24px; border-radius:10px;
-  font-weight:bold; text-decoration:none; display:inline-block;
-}
-.cards{
-  padding:60px 20px; max-width:1100px; margin:auto;
-  display:grid; grid-template-columns:repeat(3,1fr); gap:30px;
-}
-.admission-section{
-  padding:60px 20px; max-width:1100px; margin:auto;
-  display:grid; grid-template-columns:1fr 1fr; gap:40px; background:#f8fafc;
-}
-@media(max-width:768px){
-  .hero h1{ font-size:28px !important; }
-  .hero p{ font-size:16px !important; }
-  .cards{ grid-template-columns:1fr !important; padding:20px !important; }
-  .admission-section{ grid-template-columns:1fr !important; padding:20px !important; }
-}
+.hero{background:#0c152d; color:white; padding:60px 20px; text-align:center;}
+.cards{padding:30px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+.admission-wrap{padding:30px; display:grid; grid-template-columns:1fr 1fr; gap:30px; max-width:1100px; margin:auto;}
+@media(max-width:768px){ .cards,.admission-wrap{grid-template-columns:1fr !important; } .hero h1{font-size:26px !important;}}
 </style>
 
 <div class="hero">
-  <h1 style="font-size:45px; font-weight:bold; line-height:1.2;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
-  <p style="color:#FFD700; font-size:22px; margin:20px 0;">Excellence • Discipline • Integrity</p>
-  <p style="max-width:600px; margin:0 auto; font-size:18px; color:#cbd5e1; line-height:1.6;">Modern education from Pre-Primary to Form Six with full digital management for Students, Fees, Results & Attendance.</p>
-  
-  <div style="display:flex; gap:12px; margin:25px 0; justify-content:center; flex-wrap:wrap;">
-    <span style="background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:20px; font-size:13px; border:1px solid rgba(255,215,0,0.3);"><i class="bi bi-check-circle-fill" style="color:#FFD700;"></i> NECTA Registered</span>
-    <span style="background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:20px; font-size:13px; border:1px solid rgba(255,215,0,0.3);"><i class="bi bi-check-circle-fill" style="color:#FFD700;"></i> Day & Boarding</span>
-    <span style="background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:20px; font-size:13px; border:1px solid rgba(255,215,0,0.3);"><i class="bi bi-check-circle-fill" style="color:#FFD700;"></i> Transport Available</span>
+  <h1 style="font-size:42px; font-weight:bold;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
+  <p style="color:#FFD700; font-size:20px;">Excellence • Discipline • Integrity</p>
+  <p>Modern education from Pre-Primary to Form Six</p>
+  <div style="margin-top:20px;">
+    <a href="#apply" style="background:#FFD700; color:#0c152d; padding:12px 24px; border-radius:10px; font-weight:bold; text-decoration:none;">Apply Now</a>
+    <a href="/login/" style="background:#2563eb; color:white; padding:12px 24px; border-radius:10px; font-weight:bold; text-decoration:none; margin-left:10px;">Go to System</a>
   </div>
-
-  <div style="margin-top:30px;">
-    <a href="#apply" class="btn-gold">Apply Now</a>
-    <a href="/login/" class="btn-blue" style="margin-left:10px;">Go to System</a>
-  </div>
-  {% if messages %}{% for m in messages %}<div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; margin:20px auto; max-width:500px;">{{ m }}</div>{% endfor %}{% endif %}
+  {% if messages %}{% for m in messages %}<div style="background:white; color:green; padding:10px; margin-top:20px; border-radius:8px;">{{ m }}</div>{% endfor %}{% endif %}
 </div>
 
 <div class="cards">
-  <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
-    <i class="bi bi-book" style="font-size:40px; color:#2563eb;"></i>
-    <h4 style="color:#0c152d; margin-top:15px;">Quality Education</h4>
-    <p style="color:#64748b; font-size:14px;">NECTA curriculum from Baby Class to Form 6</p>
-  </div>
-  <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
-    <i class="bi bi-people" style="font-size:40px; color:#2563eb;"></i>
-    <h4 style="color:#0c152d; margin-top:15px;">Smart Management</h4>
-    <p style="color:#64748b; font-size:14px;">Connected to your Dashboard, Students & Finance system</p>
-    <a href="/login/" style="font-size:13px;">Open System →</a>
-  </div>
-  <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.05); border-top:4px solid #FFD700; text-align:center;">
-    <i class="bi bi-award" style="font-size:40px; color:#2563eb;"></i>
-    <h4 style="color:#0c152d; margin-top:15px;">Experienced Teachers</h4>
-    <p style="color:#64748b; font-size:14px;">Qualified staff for academic excellence</p>
-  </div>
+  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Quality Education</h4><p>NECTA from Baby to Form 6</p></div>
+  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Smart Management</h4><p>Dashboard & Finance</p></div>
+  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Experienced Teachers</h4><p>Qualified staff</p></div>
 </div>
 
-<!-- ADMISSION FORM ON HOMEPAGE - THIS IS WHAT WAS MISSING -->
-<div id="apply" class="admission-section">
+<div id="apply" class="admission-wrap">
   <div>
-    <h3 style="color:#0c152d; font-weight:bold;"><i class="bi bi-list-ol" style="color:#2563eb;"></i> How to Apply</h3>
-    <ol style="line-height:2.5; margin-top:15px; color:#334155;">
-      <li>Fill the form on this page</li>
-      <li>Pay Application Fee TZS 10,000</li>
-      <li>Bring Birth Certificate + 2 Photos</li>
-      <li>Entrance Interview</li>
+    <h3>How to Apply</h3>
+    <ol style="line-height:2.5;">
+      <li>Fill form</li>
+      <li>Pay TZS 10,000</li>
+      <li>Birth Certificate + Photos</li>
+      <li>Interview</li>
     </ol>
-    <div style="background:#fffbeb; padding:20px; border-radius:12px; margin-top:25px; border-left:4px solid #FFD700;">
-      <b>Need Help?</b><br>
-      <span style="font-size:14px; line-height:1.8;">Call: +255 7XX XXX XXX<br>Email: admission@kilamsa.ac.tz</span>
-    </div>
   </div>
-
-  <div style="background:white; padding:30px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;">
-    <h4 style="color:#0c152d; font-weight:bold;">Apply Now - Admission 2026</h4>
-    <form method="post" style="margin-top:15px;">
-      {% csrf_token %}
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Student Full Name *</label>
-      <input type="text" name="full_name" required style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;">
-      
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Parent Name *</label>
-      <input type="text" name="parent_name" required style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;">
-      
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Parent Phone *</label>
-      <input type="text" name="parent_phone" placeholder="07XX XXX XXX" required style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;">
-      
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Class Applying *</label>
-      <select name="class_applying" required style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;">
+  <div style="background:white; padding:25px; border-radius:16px; box-shadow:0 5px 20px rgba(0,0,0,0.08); border-top:5px solid #FFD700;">
+    <h4>Apply Now - 2026</h4>
+    <form method="post">{% csrf_token %}
+      <input name="full_name" placeholder="Student Name *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
+      <input name="parent_name" placeholder="Parent Name *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
+      <input name="parent_phone" placeholder="Parent Phone *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
+      <select name="class_applying" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
         <option value="">Select Class</option>
-        <option>Baby Class</option>
-        <option>Middle Class</option>
-        <option>Pre-Primary</option>
-        <option>Class 1</option>
-        <option>Class 2</option>
-        <option>Class 3</option>
-        <option>Class 4</option>
-        <option>Class 5</option>
-        <option>Class 6</option>
-        <option>Class 7</option>
+        <option>Baby Class</option><option>Middle Class</option><option>Pre-Primary</option>
+        <option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option>
       </select>
-
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Previous School</label>
-      <input type="text" name="previous_school" style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;">
-
-      <label style="font-size:12px; font-weight:bold; color:#475569;">Message</label>
-      <textarea name="message" rows="3" style="width:100%; padding:12px; margin:4px 0 10px; border-radius:8px; border:1px solid #ddd;"></textarea>
-
-      <button type="submit" style="width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Submit Application</button>
-      <p style="font-size:11px; text-align:center; margin-top:10px; color:#94a3b8;">Application goes directly to admin dashboard</p>
+      <input name="previous_school" placeholder="Previous School" style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
+      <textarea name="message" placeholder="Message" style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;"></textarea>
+      <button type="submit" style="width:100%; background:#0c152d; color:#FFD700; padding:12px; border:none; border-radius:8px; font-weight:bold;">Submit Application</button>
     </form>
   </div>
 </div>
+
+{% endblock %}
 {% endblock %}
