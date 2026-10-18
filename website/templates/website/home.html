@@ -15,10 +15,10 @@
 .nav-links { display:flex; gap:18px; align-items:center; }
 .nav-links a { text-decoration:none; color:#0c152d; font-size:14px; font-weight:500; }
 .nav-links a.btn-primary { background:#2563eb; color:white; padding:8px 14px; border-radius:8px; }
-.hamburger { display:none; font-size:24px; cursor:pointer; }
+.hamburger { display:none; font-size:24px; cursor:pointer; user-select:none; }
 @media(max-width:768px){
   .nav-links { display:none; flex-direction:column; position:absolute; top:60px; left:0; right:0; background:white; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
-  .nav-links.active { display:flex; }
+  .nav-links.active { display:flex !important; }
   .hamburger { display:block; }
   .nav-links a { padding:10px 0; border-bottom:1px solid #f1f5f9; width:100%; }
 }
@@ -36,8 +36,8 @@ button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none;
 
 <nav class="navbar">
   <div style="font-weight:bold; color:#0c152d;">KILAMSA <span style="color:#eab308;">SCHOOLS</span><br><small style="font-size:10px; color:#64748b; font-weight:normal;">Mlimba - Morogoro, TZ</small></div>
-  <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</div>
-  <div class="nav-links">
+  <div class="hamburger" id="hamburgerBtn">☰</div>
+  <div class="nav-links" id="navMenu">
     <a href="/">Home</a>
     <a href="/#about">About</a>
     <a href="/#programs">Programs</a>
@@ -99,6 +99,19 @@ button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none;
 </div>
 
 <div style="background:#0c152d; color:#94a3b8; text-align:center; padding:20px; font-size:12px;">© 2026 KILAMSA. Mlimba - Morogoro. Odiztech</div>
+
+<script>
+const btn = document.getElementById('hamburgerBtn');
+const menu = document.getElementById('navMenu');
+btn.addEventListener('click', () => {
+  menu.classList.toggle('active');
+});
+document.querySelectorAll('#navMenu a').forEach(link=>{
+  link.addEventListener('click', ()=>{
+    menu.classList.remove('active');
+  });
+});
+</script>
 
 </body>
 </html>
