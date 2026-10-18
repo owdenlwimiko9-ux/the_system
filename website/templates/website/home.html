@@ -6,9 +6,22 @@
 <title>KILAMSA SCHOOLS - Mlimba Morogoro</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-*{margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
-.navbar{display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 10px rgba(0,0,0,0.05); align-items:center; position:sticky; top:0; z-index:100;}
-.navbar a{text-decoration:none; color:#334155; margin:0 10px; font-size:14px;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+.navbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 20px; background:white; box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  position:sticky; top:0; z-index:1000;
+}
+.nav-links { display:flex; gap:18px; align-items:center; }
+.nav-links a { text-decoration:none; color:#0c152d; font-size:14px; font-weight:500; }
+.nav-links a.btn-primary { background:#2563eb; color:white; padding:8px 14px; border-radius:8px; }
+.hamburger { display:none; font-size:24px; cursor:pointer; }
+@media(max-width:768px){
+  .nav-links { display:none; flex-direction:column; position:absolute; top:60px; left:0; right:0; background:white; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+  .nav-links.active { display:flex; }
+  .hamburger { display:block; }
+  .nav-links a { padding:10px 0; border-bottom:1px solid #f1f5f9; width:100%; }
+}
 .hero{background:linear-gradient(135deg,#0c152d,#1e3a5f); color:white; padding:70px 20px; text-align:center;}
 .cards{padding:40px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:25px; max-width:1100px; margin:auto;}
 .card{background:white; padding:28px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.07); border-top:4px solid #FFD700; text-align:center;}
@@ -16,21 +29,23 @@
 .form-box{background:white; padding:28px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;}
 input,select,textarea{width:100%; padding:12px; margin:6px 0 12px; border:1px solid #ddd; border-radius:8px;}
 button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
-@media(max-width:768px){ .cards{grid-template-columns:1fr;} .apply-wrap{grid-template-columns:1fr;} .hero h1{font-size:26px !important;} .navbar div:last-child{display:none;} }
+@media(max-width:768px){ .cards{grid-template-columns:1fr;} .apply-wrap{grid-template-columns:1fr;} .hero h1{font-size:26px !important;}}
 </style>
 </head>
 <body>
 
-<div class="navbar">
-  <div><b style="color:#0c152d;">KILAMSA SCHOOLS</b><br><small style="font-size:10px; color:#64748b;">Excellence • Discipline • Integrity</small></div>
-  <div>
+<nav class="navbar">
+  <div style="font-weight:bold; color:#0c152d;">KILAMSA <span style="color:#eab308;">SCHOOLS</span><br><small style="font-size:10px; color:#64748b; font-weight:normal;">Mlimba - Morogoro, TZ</small></div>
+  <div class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('active')">☰</div>
+  <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/about/">About</a>
-    <a href="/programs/">Programs</a>
-    <a href="#apply">Admission</a>
-    <a href="/login/" style="background:#2563eb; color:white; padding:8px 14px; border-radius:8px;">School Management</a>
+    <a href="/#about">About</a>
+    <a href="/#programs">Programs</a>
+    <a href="/admissions/">Admission</a>
+    <a href="/#teachers">Teachers</a>
+    <a href="/login/" class="btn-primary">School Management</a>
   </div>
-</div>
+</nav>
 
 <div class="hero">
   <h1 style="font-size:42px; line-height:1.2;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
@@ -43,10 +58,20 @@ button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none;
   </div>
 </div>
 
-<div class="cards">
-  <div class="card"><i class="bi bi-book" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Quality Education</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">NECTA curriculum Baby to Form 6</p></div>
-  <div class="card"><i class="bi bi-people" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Smart Management</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Dashboard, Students & Finance</p></div>
+<div id="about" style="padding:60px 20px; max-width:900px; margin:auto; text-align:center;">
+  <h2 style="color:#0c152d;">About KILAMSA</h2>
+  <p style="margin-top:15px; color:#475569; line-height:1.8;">NECTA Registered - Day & Boarding - Transport Available. We provide quality education from Baby Class to Form Six in Mlimba, Morogoro.</p>
+</div>
+
+<div id="programs" class="cards">
+  <div class="card"><i class="bi bi-book" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Quality Education</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">NECTA Baby to Form 6</p></div>
+  <div class="card"><i class="bi bi-people" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Smart Management</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Dashboard & Finance</p></div>
   <div class="card"><i class="bi bi-award" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Experienced Teachers</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Qualified staff excellence</p></div>
+</div>
+
+<div id="teachers" style="padding:40px 20px; text-align:center; background:white;">
+  <h2 style="color:#0c152d;">Our Teachers</h2>
+  <p style="color:#64748b;">Dedicated team for academic excellence - Day & Boarding support</p>
 </div>
 
 <div id="apply" class="apply-wrap">
@@ -58,14 +83,10 @@ button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none;
       <li>Bring Birth Certificate + 2 Photos</li>
       <li>Entrance Interview</li>
     </ol>
-    <div style="background:#fffbeb; padding:18px; border-radius:12px; margin-top:20px; border-left:4px solid #FFD700;">
-      <b>Need Help?</b><br><small>Call: +255 7XX XXX XXX<br>Email: admission@kilamsa.ac.tz</small>
-    </div>
   </div>
   <div class="form-box">
     <h4 style="color:#0c152d;">Apply Now - Admission 2026</h4>
-    <form method="post" style="margin-top:15px;">
-      {% csrf_token %}
+    <form method="post">{% csrf_token %}
       <input type="text" name="full_name" placeholder="Student Full Name *" required>
       <input type="text" name="parent_name" placeholder="Parent Name *" required>
       <input type="text" name="parent_phone" placeholder="Parent Phone *" required>
@@ -77,7 +98,7 @@ button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none;
   </div>
 </div>
 
-<div style="background:#0c152d; color:#94a3b8; text-align:center; padding:20px; font-size:12px;">© 2026 KILAMSA. Mlimba - Morogoro. Developed by Odiztech</div>
+<div style="background:#0c152d; color:#94a3b8; text-align:center; padding:20px; font-size:12px;">© 2026 KILAMSA. Mlimba - Morogoro. Odiztech</div>
 
 </body>
 </html>
