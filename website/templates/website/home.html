@@ -1,58 +1,83 @@
-{% extends 'base_public.html' %}
-{% block content %}
-{% block body %}
-
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KILAMSA SCHOOLS - Mlimba Morogoro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-.hero{background:#0c152d; color:white; padding:60px 20px; text-align:center;}
-.cards{padding:30px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-.admission-wrap{padding:30px; display:grid; grid-template-columns:1fr 1fr; gap:30px; max-width:1100px; margin:auto;}
-@media(max-width:768px){ .cards,.admission-wrap{grid-template-columns:1fr !important; } .hero h1{font-size:26px !important;}}
+*{margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
+.navbar{display:flex; justify-content:space-between; padding:15px 25px; background:white; box-shadow:0 2px 10px rgba(0,0,0,0.05); align-items:center; position:sticky; top:0; z-index:100;}
+.navbar a{text-decoration:none; color:#334155; margin:0 10px; font-size:14px;}
+.hero{background:linear-gradient(135deg,#0c152d,#1e3a5f); color:white; padding:70px 20px; text-align:center;}
+.cards{padding:40px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:25px; max-width:1100px; margin:auto;}
+.card{background:white; padding:28px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.07); border-top:4px solid #FFD700; text-align:center;}
+.apply-wrap{max-width:1100px; margin:auto; display:grid; grid-template-columns:1fr 1fr; gap:35px; padding:50px 20px; background:#f8fafc;}
+.form-box{background:white; padding:28px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;}
+input,select,textarea{width:100%; padding:12px; margin:6px 0 12px; border:1px solid #ddd; border-radius:8px;}
+button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
+@media(max-width:768px){ .cards{grid-template-columns:1fr;} .apply-wrap{grid-template-columns:1fr;} .hero h1{font-size:26px !important;} .navbar div:last-child{display:none;} }
 </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div><b style="color:#0c152d;">KILAMSA SCHOOLS</b><br><small style="font-size:10px; color:#64748b;">Excellence • Discipline • Integrity</small></div>
+  <div>
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/programs/">Programs</a>
+    <a href="#apply">Admission</a>
+    <a href="/login/" style="background:#2563eb; color:white; padding:8px 14px; border-radius:8px;">School Management</a>
+  </div>
+</div>
 
 <div class="hero">
-  <h1 style="font-size:42px; font-weight:bold;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
-  <p style="color:#FFD700; font-size:20px;">Excellence • Discipline • Integrity</p>
-  <p>Modern education from Pre-Primary to Form Six</p>
-  <div style="margin-top:20px;">
-    <a href="#apply" style="background:#FFD700; color:#0c152d; padding:12px 24px; border-radius:10px; font-weight:bold; text-decoration:none;">Apply Now</a>
-    <a href="/login/" style="background:#2563eb; color:white; padding:12px 24px; border-radius:10px; font-weight:bold; text-decoration:none; margin-left:10px;">Go to System</a>
+  <h1 style="font-size:42px; line-height:1.2;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
+  <p style="color:#FFD700; font-size:20px; margin:15px 0;">Excellence • Discipline • Integrity</p>
+  <p style="max-width:600px; margin:10px auto; color:#cbd5e1;">Modern education from Pre-Primary to Form Six with full digital management.</p>
+  {% if messages %}{% for m in messages %}<div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; max-width:500px; margin:20px auto;">{{ m }}</div>{% endfor %}{% endif %}
+  <div style="margin-top:25px;">
+    <a href="#apply" style="background:#FFD700; color:#0c152d; padding:12px 22px; border-radius:10px; text-decoration:none; font-weight:bold;">Apply Now</a>
+    <a href="/login/" style="background:#2563eb; color:white; padding:12px 22px; border-radius:10px; text-decoration:none; font-weight:bold; margin-left:8px;">Go to System</a>
   </div>
-  {% if messages %}{% for m in messages %}<div style="background:white; color:green; padding:10px; margin-top:20px; border-radius:8px;">{{ m }}</div>{% endfor %}{% endif %}
 </div>
 
 <div class="cards">
-  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Quality Education</h4><p>NECTA from Baby to Form 6</p></div>
-  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Smart Management</h4><p>Dashboard & Finance</p></div>
-  <div style="background:white; padding:20px; border-radius:12px; border-top:4px solid #FFD700; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.05);"><h4>Experienced Teachers</h4><p>Qualified staff</p></div>
+  <div class="card"><i class="bi bi-book" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Quality Education</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">NECTA curriculum Baby to Form 6</p></div>
+  <div class="card"><i class="bi bi-people" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Smart Management</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Dashboard, Students & Finance</p></div>
+  <div class="card"><i class="bi bi-award" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Experienced Teachers</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Qualified staff excellence</p></div>
 </div>
 
-<div id="apply" class="admission-wrap">
+<div id="apply" class="apply-wrap">
   <div>
-    <h3>How to Apply</h3>
-    <ol style="line-height:2.5;">
-      <li>Fill form</li>
-      <li>Pay TZS 10,000</li>
-      <li>Birth Certificate + Photos</li>
-      <li>Interview</li>
+    <h3 style="color:#0c152d;"><i class="bi bi-list-ol" style="color:#2563eb;"></i> How to Apply</h3>
+    <ol style="line-height:2.8; margin-top:15px; color:#334155;">
+      <li>Fill the form on this page</li>
+      <li>Pay Application Fee TZS 10,000</li>
+      <li>Bring Birth Certificate + 2 Photos</li>
+      <li>Entrance Interview</li>
     </ol>
+    <div style="background:#fffbeb; padding:18px; border-radius:12px; margin-top:20px; border-left:4px solid #FFD700;">
+      <b>Need Help?</b><br><small>Call: +255 7XX XXX XXX<br>Email: admission@kilamsa.ac.tz</small>
+    </div>
   </div>
-  <div style="background:white; padding:25px; border-radius:16px; box-shadow:0 5px 20px rgba(0,0,0,0.08); border-top:5px solid #FFD700;">
-    <h4>Apply Now - 2026</h4>
-    <form method="post">{% csrf_token %}
-      <input name="full_name" placeholder="Student Name *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
-      <input name="parent_name" placeholder="Parent Name *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
-      <input name="parent_phone" placeholder="Parent Phone *" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
-      <select name="class_applying" required style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
-        <option value="">Select Class</option>
-        <option>Baby Class</option><option>Middle Class</option><option>Pre-Primary</option>
-        <option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option>
-      </select>
-      <input name="previous_school" placeholder="Previous School" style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;">
-      <textarea name="message" placeholder="Message" style="width:100%; padding:11px; margin:5px 0; border:1px solid #ddd; border-radius:8px;"></textarea>
-      <button type="submit" style="width:100%; background:#0c152d; color:#FFD700; padding:12px; border:none; border-radius:8px; font-weight:bold;">Submit Application</button>
+  <div class="form-box">
+    <h4 style="color:#0c152d;">Apply Now - Admission 2026</h4>
+    <form method="post" style="margin-top:15px;">
+      {% csrf_token %}
+      <input type="text" name="full_name" placeholder="Student Full Name *" required>
+      <input type="text" name="parent_name" placeholder="Parent Name *" required>
+      <input type="text" name="parent_phone" placeholder="Parent Phone *" required>
+      <select name="class_applying" required><option value="">Class Applying *</option><option>Baby Class</option><option>Middle Class</option><option>Pre-Primary</option><option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option></select>
+      <input type="text" name="previous_school" placeholder="Previous School">
+      <textarea name="message" placeholder="Message" rows="3"></textarea>
+      <button type="submit">Submit Application</button>
     </form>
   </div>
 </div>
 
-{% endblock %}
-{% endblock %}
+<div style="background:#0c152d; color:#94a3b8; text-align:center; padding:20px; font-size:12px;">© 2026 KILAMSA. Mlimba - Morogoro. Developed by Odiztech</div>
+
+</body>
+</html>
