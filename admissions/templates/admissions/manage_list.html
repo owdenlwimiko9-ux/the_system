@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+<h2>Admission Applications ({{ applications.count }})</h2>
+<table class="table table-striped">
+<tr><th>Code</th><th>Name</th><th>Phone</th><th>Class</th><th>Status</th><th>Date</th><th>Action</th></tr>
+{% for app in applications %}
+<tr>
+<td>{{ app.application_code }}</td>
+<td>{{ app.full_name }}</td>
+<td>{{ app.parent_phone }}</td>
+<td>{{ app.class_applying }}</td>
+<td><span class="badge bg-warning">{{ app.status }}</span></td>
+<td>{{ app.created_at|date:"Y-m-d" }}</td>
+<td>
+<a href="{% url 'admissions_manage_detail' app.pk %}" class="btn btn-sm btn-primary">View</a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="7">No applications yet</td></tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}
