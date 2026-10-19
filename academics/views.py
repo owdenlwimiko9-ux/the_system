@@ -9,9 +9,9 @@ from urllib.parse import quote
 from django.utils import timezone
 import openpyxl
 
-from.models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
+from .models import AcademicYear, Term, ClassRoom, Subject, Teacher, Exam, ExamResult, StudentReport
 from students.models import Student
-from.forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
+from .forms import AcademicYearForm, TermForm, SubjectForm, ExamForm, ClassRoomForm
 
 class TeacherForm(forms.ModelForm):
     class Meta:
@@ -73,7 +73,7 @@ def class_list(request):
     try: classes = list(ClassRoom.objects.all().order_by('level','stream'))
     except: classes = []
     for c in classes:
-        try: c.student_count = Student.objects.filter(class_room=c).count()
+        try: c.student_count = Student.objects.filter(class_room=c, is_active=True).count()
         except: c.student_count = 0
     try: ac_year = AcademicYear.objects.filter(is_active=True).first()
     except: ac_year = None
@@ -105,26 +105,46 @@ def class_update(request, pk):
         return redirect('academics:class_list')
     return render(request, "academics/class_form.html", {'form': form, 'title': 'Edit Class'})
 
-def class_dashboard(request, pk):
-    cls = get_object_or_404(ClassRoom, pk=pk)
-    students = Student.objects.filter(class_room=cls).order_by('first_name')
-    subjects = Subject.objects.filter(class_room=cls)
-    return render(request, 'academics/class_dashboard.html', {'cls': cls, 'students': students, 'subjects': subjects, 'student_count': students.count(), 'subject_count': subjects.count(), 'academic_year': AcademicYear.objects.filter(is_active=True).first()})
-
-def class_overview(request, class_id):
-    class_room = get_object_or_404(ClassRoom, pk=class_id)
-    students = Student.objects.filter(class_room=class_room).order_by('first_name')
-    subjects = Subject.objects.filter(class_room=class_room)
-    academic_year = AcademicYear.objects.filter(is_active=True).first()
-    teachers = Teacher.objects.filter(subjects__in=subjects).distinct() if subjects else Teacher.objects.none()
-    exams = Exam.objects.filter(class_room=class_room).select_related('term').order_by('id')
-    return render(request, "academics/class_overview.html", {'class_room': class_room, 'students': students, 'teachers': teachers, 'subjects': subjects, 'student_count': students.count(), 'academic_year': academic_year, 'term_exams': {}, 'latest_exam': exams.last()})
-
+# ===== FIXED: class_dashboard & class_overview & class_detail ALL USE SAME LOGIC =====
 def class_detail(request, pk):
     class_room = get_object_or_404(ClassRoom, id=pk)
-    students = Student.objects.filter(class_room=class_room).order_by('first_name')
-    exams = Exam.objects.filter(class_room=class_room)
-    return render(request, 'academics/class_detail.html', {'class_room': class_room, 'students': students, 'exams': exams})
+    students = Student.objects.filter(class_room=class_room, is_active=True).order_by('first_name')
+    subjects = Subject.objects.filter(class_room=class_room)
+    academic_year = AcademicYear.objects.filter(is_active=True).first()
+    teachers = Teacher.objects.filter(subjects__in=subjects).distinct() if subjects.exists() else Teacher.objects.none()
+    exams = Exam.objects.filter(class_room=class_room).select_related('term').order_by('term__start_date', 'id', 'name')
+    
+    # Build term_exams dict exactly as your template expects
+    term_exams = {}
+    for exam in exams:
+        term_label = exam.term.name if exam.term else "General"
+        if term_label not in term_exams:
+            term_exams[term_label] = []
+        reports = StudentReport.objects.filter(exam=exam, class_room=class_room).select_related('student').order_by('position')
+        term_exams[term_label].append({
+            'exam': exam,
+            'reports': reports
+        })
+    
+    latest_exam = exams.last() if exams.exists() else None
+    
+    return render(request, 'academics/class_detail.html', {
+        'class_room': class_room,
+        'students': students,
+        'student_count': students.count(),
+        'subjects': subjects,
+        'teachers': teachers,
+        'academic_year': academic_year,
+        'term_exams': term_exams,
+        'latest_exam': latest_exam,
+        'exams': exams,
+    })
+
+def class_dashboard(request, pk):
+    return class_detail(request, pk)
+
+def class_overview(request, class_id):
+    return class_detail(request, class_id)
 
 def year_list(request):
     return render(request, "academics/year_list.html", {'years': AcademicYear.objects.all()})
@@ -228,7 +248,7 @@ def teacher_update(request, pk):
 def teacher_dashboard(request):
     teacher = Teacher.objects.filter(email=request.user.email).first()
     if not teacher: return render(request, 'academics/no_teacher_profile.html')
-    return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_subjects': Subject.objects.filter(teacher=teacher), 'active_exams': Exam.objects.filter(is_active=True)})
+    return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_subjects': Subject.objects.filter(teacher=teacher), 'active_exams': Exam.objects.filter(is_active=True) if hasattr(Exam, 'is_active') else Exam.objects.all()})
 
 def assign_subject_to_teacher(request, pk):
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -251,7 +271,7 @@ def exam_create(request):
 def download_template(request, exam_id):
     exam = get_object_or_404(Exam, pk=exam_id)
     subjects = Subject.objects.filter(class_room=exam.class_room).order_by('name')
-    students = Student.objects.filter(class_room=exam.class_room).order_by('first_name')
+    students = Student.objects.filter(class_room=exam.class_room, is_active=True).order_by('first_name')
     wb = openpyxl.Workbook(); ws = wb.active
     headers = ['AdmissionNumber', 'StudentName']
     for s in subjects:
@@ -272,19 +292,19 @@ def bulk_upload_results(request, exam_id):
         wb = openpyxl.load_workbook(request.FILES['excel_file']); ws = wb.active
         for row in ws.iter_rows(min_row=2, values_only=True):
             if not row[0]: continue
-            student = Student.objects.filter(admission_number=row[0], class_room=exam.class_room).first()
+            student = Student.objects.filter(admission_number=row[0], class_room=exam.class_room, is_active=True).first()
             if not student: continue
             col=2
-            ExamResult.objects.filter(student=student, exam=exam).delete()
+            # Don't delete here, update_or_create below
             for subj in subjects:
                 try:
                     t = float(row[col]) if row[col] not in [None,''] else 0
                     e = float(row[col+1]) if row[col+1] not in [None,''] else 0
                 except: t=e=0
                 col+=2
-                ExamResult.objects.create(student=student, exam=exam, subject=subj, test_marks=t, exam_marks=e)
+                ExamResult.objects.update_or_create(student=student, exam=exam, subject=subj, defaults={'test_marks': t, 'exam_marks': e})
         messages.success(request, f"Results uploaded for {exam.name}")
-        return redirect('academics:class_dashboard', pk=exam.class_room.id)
+        return redirect('academics:class_detail', pk=exam.class_room.id)
     return render(request, "academics/bulk_upload.html", {'exam': exam})
 
 def student_profile(request, pk):
@@ -298,23 +318,98 @@ def report_detail(request, pk):
 
 def report_list(request, pk):
     class_room = get_object_or_404(ClassRoom, pk=pk)
-    return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': StudentReport.objects.filter(student__class_room=class_room).order_by('student__last_name')})
+    return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': StudentReport.objects.filter(class_room=class_room).order_by('student__first_name')})
 
+# ===== FIXED: generate_reports NOW ACTUALLY CREATES REPORTS =====
 def generate_reports(request, class_id):
-    return redirect('academics:class_dashboard', pk=class_id)
+    class_room = get_object_or_404(ClassRoom, id=class_id)
+    students = Student.objects.filter(class_room=class_room, is_active=True)
+    subjects = Subject.objects.filter(class_room=class_room)
+    exams = Exam.objects.filter(class_room=class_room)
+
+    if not exams.exists():
+        messages.error(request, "No exams found for this class. Create exam first.")
+        return redirect('academics:class_detail', pk=class_id)
+
+    if not subjects.exists():
+        messages.error(request, "No subjects found for this class.")
+        return redirect('academics:class_detail', pk=class_id)
+
+    total_created = 0
+    for exam in exams:
+        # Check if exam has any results
+        if not ExamResult.objects.filter(exam=exam, student__class_room=class_room).exists():
+            continue
+        
+        student_totals = []
+        for student in students:
+            results = ExamResult.objects.filter(student=student, exam=exam)
+            if not results.exists():
+                continue
+            
+            total_marks = 0
+            points_list = []
+            for res in results:
+                score = float(res.test_marks or 0) + float(res.exam_marks or 0)
+                total_marks += score
+                if class_room.level_group == 'ORDINARY':
+                    points_list.append(get_ordinary_points(score))
+                elif class_room.level_group == 'ADVANCED':
+                    points_list.append(get_advanced_points(score))
+            
+            avg = total_marks / max(results.count(), 1)
+            
+            if class_room.level_group in ['ORDINARY', 'ADVANCED']:
+                div_points, division = calculate_best_points(points_list, class_room.level_group)
+            else:
+                div_points = 0
+                if avg >= 75: division = 'A'
+                elif avg >= 65: division = 'B'
+                elif avg >= 45: division = 'C'
+                elif avg >= 30: division = 'D'
+                else: division = 'F'
+
+            report, created = StudentReport.objects.update_or_create(
+                student=student,
+                exam=exam,
+                defaults={
+                    'class_room': class_room,
+                    'total_marks': total_marks,
+                    'average_marks': avg,
+                    'division_points': div_points,
+                    'division': division,
+                }
+            )
+            student_totals.append((report, avg))
+            total_created += 1
+        
+        # Assign positions based on average descending
+        student_totals.sort(key=lambda x: x[1], reverse=True)
+        for pos, (rep, _) in enumerate(student_totals, start=1):
+            rep.position = pos
+            rep.save()
+
+    if total_created == 0:
+        messages.warning(request, "No marks found. Upload marks first via Bulk Upload or Enter Marks.")
+    else:
+        messages.success(request, f"Successfully generated {total_created} reports for {class_room}")
+
+    return redirect('academics:class_detail', pk=class_id)
 
 def bulk_print_class_reports(request, class_id, exam_id):
     class_room = get_object_or_404(ClassRoom, id=class_id)
     exam = get_object_or_404(Exam, id=exam_id)
-    students = Student.objects.filter(class_room=class_room).order_by('admission_number')
-    result_data = [{'student': s, 'report': StudentReport.objects.filter(student=s, exam=exam).first(), 'subjects': ExamResult.objects.filter(student=s, exam=exam)} for s in students]
+    students = Student.objects.filter(class_room=class_room, is_active=True).order_by('admission_number')
+    result_data = [{'student': s, 'report': StudentReport.objects.filter(student=s, exam=exam).first(), 'subjects': ExamResult.objects.filter(student=s, exam=exam).select_related('subject')} for s in students]
     return render(request, 'academics/result_sheet.html', {'class_room': class_room, 'exam': exam, 'result_data': result_data})
 
 def report_pdf(request, pk):
     return redirect('academics:report_detail', pk=pk)
 
 def send_results_to_parents(request, class_id, term_number):
-    return redirect('academics:class_dashboard', pk=class_id)
+    # TODO: Implement WhatsApp sending
+    messages.info(request, f"Send to parents for term {term_number} - Coming soon")
+    return redirect('academics:class_detail', pk=class_id)
 
 def send_whatsapp_page(request, class_id):
     return render(request, 'academics/send_whatsapp.html', {'class_room': get_object_or_404(ClassRoom, id=class_id), 'links': [], 'total': 0})
@@ -323,13 +418,20 @@ def send_whatsapp_page(request, class_id):
 def enter_marks(request, class_pk, exam_pk):
     class_room = get_object_or_404(ClassRoom, id=class_pk)
     exam = get_object_or_404(Exam, id=exam_pk)
-    students = Student.objects.filter(class_room=class_room).order_by('first_name')
+    students = Student.objects.filter(class_room=class_room, is_active=True).order_by('first_name')
     subjects = Subject.objects.filter(class_room=class_room)
     if request.method == 'POST':
         for st in students:
             for subj in subjects:
                 t = request.POST.get(f'test_{st.id}_{subj.id}', 0) or 0
                 e = request.POST.get(f'exam_{st.id}_{subj.id}', 0) or 0
+                try: t=float(t)
+                except: t=0
+                try: e=float(e)
+                except: e=0
                 ExamResult.objects.update_or_create(student=st, exam=exam, subject=subj, defaults={'test_marks': t, 'exam_marks': e})
+        messages.success(request, "Marks saved successfully")
         return redirect('academics:class_detail', pk=class_pk)
-    return render(request, 'academics/enter_marks.html', {'class_room': class_room, 'exam': exam, 'students': students, 'subjects': subjects})
+    # preload existing marks
+    existing = {(r.student_id, r.subject_id): r for r in ExamResult.objects.filter(exam=exam)}
+    return render(request, 'academics/enter_marks.html', {'class_room': class_room, 'exam': exam, 'students': students, 'subjects': subjects, 'existing': existing})
