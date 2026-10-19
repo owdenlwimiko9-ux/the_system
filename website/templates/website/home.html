@@ -3,115 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KILAMSA SCHOOLS - Mlimba Morogoro</title>
+<title>KILAMSA SCHOOLS - Excellence in Mlimba, Morogoro</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-.navbar {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px 20px; background:white; box-shadow:0 2px 10px rgba(0,0,0,0.05);
-  position:sticky; top:0; z-index:1000;
-}
-.nav-links { display:flex; gap:18px; align-items:center; }
-.nav-links a { text-decoration:none; color:#0c152d; font-size:14px; font-weight:500; }
-.nav-links a.btn-primary { background:#2563eb; color:white; padding:8px 14px; border-radius:8px; }
-.hamburger { display:none; font-size:24px; cursor:pointer; user-select:none; }
-@media(max-width:768px){
-  .nav-links { display:none; flex-direction:column; position:absolute; top:60px; left:0; right:0; background:white; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
-  .nav-links.active { display:flex !important; }
-  .hamburger { display:block; }
-  .nav-links a { padding:10px 0; border-bottom:1px solid #f1f5f9; width:100%; }
-}
-.hero{background:linear-gradient(135deg,#0c152d,#1e3a5f); color:white; padding:70px 20px; text-align:center;}
-.cards{padding:40px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:25px; max-width:1100px; margin:auto;}
-.card{background:white; padding:28px; border-radius:16px; box-shadow:0 3px 15px rgba(0,0,0,0.07); border-top:4px solid #FFD700; text-align:center;}
-.apply-wrap{max-width:1100px; margin:auto; display:grid; grid-template-columns:1fr 1fr; gap:35px; padding:50px 20px; background:#f8fafc;}
-.form-box{background:white; padding:28px; border-radius:16px; box-shadow:0 8px 30px rgba(0,0,0,0.08); border-top:5px solid #FFD700;}
-input,select,textarea{width:100%; padding:12px; margin:6px 0 12px; border:1px solid #ddd; border-radius:8px;}
-button{width:100%; background:#0c152d; color:#FFD700; padding:13px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;}
-@media(max-width:768px){ .cards{grid-template-columns:1fr;} .apply-wrap{grid-template-columns:1fr;} .hero h1{font-size:26px !important;}}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+:root{--navy:#0a1931;--gold:#FFC700;--blue:#2563eb;--light:#f8fafc}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:0 4px 30px rgba(0,0,0,.05);position:sticky;top:0;z-index:1000}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{text-decoration:none;color:var(--navy);font-size:14px;font-weight:600;transition:.2s}
+.nav-links a:hover{color:var(--blue)}
+.btn-gold{background:var(--navy);color:var(--gold)!important;padding:10px 20px;border-radius:30px;font-weight:700}
+.btn-blue{background:var(--blue);color:white!important;padding:10px 20px;border-radius:30px}
+#menu-toggle{display:none}.hamburger{display:none;font-size:26px;cursor:pointer}
+@media(max-width:900px){.hamburger{display:block}.nav-links{display:none;flex-direction:column;position:absolute;top:68px;left:0;right:0;background:white;padding:25px;box-shadow:0 20px 40px rgba(0,0,0,.1);gap:0}#menu-toggle:checked ~ .nav-links{display:flex}.nav-links a{width:100%;padding:14px 0;border-bottom:1px solid #f1f5f9}}
+
+.hero{background:linear-gradient(105deg,var(--navy) 0%, #162e5a 55%, #1e3a7a 100%);color:white;padding:90px 5% 80px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center;overflow:hidden;position:relative}
+.hero::after{content:'';position:absolute;right:-10%;top:-20%;width:600px;height:600px;background:radial-gradient(circle, rgba(255,199,0,.15), transparent 70%);border-radius:50%}
+.hero h1{font-family:'Playfair Display',serif;font-size:52px;line-height:1.05;letter-spacing:-1px}
+.hero h1 span{color:var(--gold)}
+.hero p.sub{color:#cbd5e1;font-size:17px;margin:18px 0 28px;line-height:1.6;max-width:520px}
+.hero-stats{display:flex;gap:30px;margin-top:35px}
+.hero-stats b{font-size:28px;color:var(--gold);display:block}.hero-stats small{color:#94a3b8;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.hero-card{background:white;border-radius:20px;padding:28px;color:var(--navy);box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;z-index:2}
+
+.section{padding:80px 5%;max-width:1300px;margin:auto}
+.badge{background:#e0f2fe;color:var(--blue);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:30px}
+.card{ background:white;padding:30px;border-radius:18px;border:1px solid #f1f5f9;transition:.3s}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.08)}
+.card i{width:54px;height:54px;display:grid;place-items:center;background:var(--light);border-radius:12px;font-size:24px;color:var(--blue);margin-bottom:16px}
+
+.programs{background:var(--light)}
+.program-card{background:white;border-radius:20px;overflow:hidden;border:1px solid #eef2f7}
+.program-card .top{height:6px;background:var(--gold)}
+.program-card .body{padding:26px}
+
+.apply{display:grid;grid-template-columns:1fr 1.1fr;gap:50px;align-items:start;background:var(--navy);color:white;border-radius:24px;padding:50px}
+.apply input, .apply select, .apply textarea{width:100%;padding:14px 16px;margin:8px 0 14px;border:1px solid #e2e8f0;border-radius:10px;background:white;color:var(--navy)}
+.apply button{width:100%;background:var(--gold);color:var(--navy);padding:15px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer}
+
+@media(max-width:900px){.hero{grid-template-columns:1fr;padding:60px 5%}.hero h1{font-size:32px}.grid3{grid-template-columns:1fr}.apply{grid-template-columns:1fr;padding:30px 20px}}
 </style>
 </head>
 <body>
 
 <nav class="navbar">
-  <div style="font-weight:bold; color:#0c152d;">KILAMSA <span style="color:#eab308;">SCHOOLS</span><br><small style="font-size:10px; color:#64748b; font-weight:normal;">Mlimba - Morogoro, TZ</small></div>
-  <div class="hamburger" id="hamburgerBtn">☰</div>
-  <div class="nav-links" id="navMenu">
-    <a href="/">Home</a>
-    <a href="/#about">About</a>
-    <a href="/#programs">Programs</a>
-    <a href="/admissions/">Admission</a>
-    <a href="/#teachers">Teachers</a>
-    <a href="/login/" class="btn-primary">School Management</a>
-  </div>
+<div style="font-weight:800;color:var(--navy);line-height:1;">KILAMSA <span style="color:var(--blue);">SCHOOLS</span><br><small style="font-weight:600;letter-spacing:2px;font-size:9px;color:#64748b;">MLIMBA • MOROGORO</small></div>
+<input type="checkbox" id="menu-toggle"><label for="menu-toggle" class="hamburger">☰</label>
+<div class="nav-links">
+<a href="/">Home</a><a href="#about">About</a><a href="#programs">Programs</a><a href="/admissions/">Admission</a><a href="#teachers">Teachers</a><a href="/login/" class="btn-gold">Portal <i class="bi bi-arrow-right"></i></a>
+</div>
 </nav>
 
 <div class="hero">
-  <h1 style="font-size:42px; line-height:1.2;">KILAMSA PRE, PRIMARY<br>AND SECONDARY SCHOOL</h1>
-  <p style="color:#FFD700; font-size:20px; margin:15px 0;">Excellence • Discipline • Integrity</p>
-  <p style="max-width:600px; margin:10px auto; color:#cbd5e1;">Modern education from Pre-Primary to Form Six with full digital management.</p>
-  {% if messages %}{% for m in messages %}<div style="background:#dcfce7; color:#166534; padding:12px; border-radius:8px; max-width:500px; margin:20px auto;">{{ m }}</div>{% endfor %}{% endif %}
-  <div style="margin-top:25px;">
-    <a href="#apply" style="background:#FFD700; color:#0c152d; padding:12px 22px; border-radius:10px; text-decoration:none; font-weight:bold;">Apply Now</a>
-    <a href="/login/" style="background:#2563eb; color:white; padding:12px 22px; border-radius:10px; text-decoration:none; font-weight:bold; margin-left:8px;">Go to System</a>
-  </div>
+<div>
+<span class="badge" style="background:rgba(255,199,0,.15);color:var(--gold);border:1px solid rgba(255,199,0,.3)">NECTA REGISTERED • DAY & BOARDING</span>
+<h1>Where <span>Excellence</span> Meets Character in Mlimba.</h1>
+<p class="sub">From Baby Class to Form Six, we deliver Tanzania's most trusted education with modern digital management, qualified teachers, and God-fearing values.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap;">
+<a href="#apply" style="background:var(--gold);color:var(--navy);padding:14px 26px;border-radius:30px;text-decoration:none;font-weight:800;">Apply for 2026 →</a>
+<a href="#about" style="border:1px solid rgba(255,255,255,.2);color:white;padding:14px 26px;border-radius:30px;text-decoration:none;font-weight:600;">Explore Campus</a>
+</div>
+<div class="hero-stats">
+<div><b>850+</b><small>Students</small></div><div><b>16</b><small>Years</small></div><div><b>100%</b><small>NECTA Pass</small></div>
+</div>
+</div>
+<div class="hero-card">
+<h4 style="margin-bottom:18px;"><i class="bi bi-patch-check-fill" style="color:var(--blue)"></i> Why Parents Choose Us</h4>
+{% for item in features %}
+<div style="display:flex;gap:12px;margin:14px 0;"><i class="bi bi-check-circle-fill" style="color:#22c55e;"></i><div><b style="font-size:14px;">{{ item }}</b><p style="font-size:12px;color:#64748b;margin-top:2px;">Quality assured</p></div></div>
+{% endfor %}
+<div style="display:flex;gap:12px;margin:14px 0;"><i class="bi bi-check-circle-fill" style="color:#22c55e;"></i><div><b style="font-size:14px;">Smart School System</b><p style="font-size:12px;color:#64748b;">Fees, Results, Attendance online</p></div></div>
+<div style="display:flex;gap:12px;margin:14px 0;"><i class="bi bi-check-circle-fill" style="color:#22c55e;"></i><div><b style="font-size:14px;">Transport & Boarding</b><p style="font-size:12px;color:#64748b;">Safe buses + dormitories</p></div></div>
+<div style="display:flex;gap:12px;margin:14px 0;"><i class="bi bi-check-circle-fill" style="color:#22c55e;"></i><div><b style="font-size:14px;">Experienced Teachers</b><p style="font-size:12px;color:#64748b;">NECTA examiners & mentors</p></div></div>
+<div style="margin-top:20px;background:#f8fafc;padding:14px;border-radius:12px;display:flex;align-items:center;gap:10px;"><img src="https://i.pravatar.cc/40" style="border-radius:50%"><div><b style="font-size:13px;">"My child improved from D to A in 1 year"</b><br><small style="color:#64748b;">Parent, Class 5 - 2025</small></div></div>
+</div>
 </div>
 
-<div id="about" style="padding:60px 20px; max-width:900px; margin:auto; text-align:center;">
-  <h2 style="color:#0c152d;">About KILAMSA</h2>
-  <p style="margin-top:15px; color:#475569; line-height:1.8;">NECTA Registered - Day & Boarding - Transport Available. We provide quality education from Baby Class to Form Six in Mlimba, Morogoro.</p>
+<div id="about" class="section">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;" class="about-grid">
+<div>
+<span class="badge">About KILAMSA</span>
+<h2 style="font-family:'Playfair Display';font-size:38px;margin:14px 0;line-height:1.1;color:var(--navy)">Building Leaders Since 2010, From Mlimba to the Nation.</h2>
+<p style="color:#475569;line-height:1.8;margin-top:15px;">We started with 30 pupils and a vision. Today KILAMSA is Morogoro's trusted centre for Pre-Primary, Primary (Class 1-7) and Secondary (Form 1-6) with both Day & Boarding.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px;">
+<div style="background:#fffbeb;padding:18px;border-radius:14px;border:1px solid #fef3c7"><i class="bi bi-bullseye" style="color:#d97706;"></i><b style="display:block;margin-top:6px;">Mission</b><small style="color:#64748b;">Nurture disciplined, excellent, God-fearing leaders.</small></div>
+<div style="background:#eff6ff;padding:18px;border-radius:14px;border:1px solid #dbeafe"><i class="bi bi-eye" style="color:var(--blue);"></i><b style="display:block;margin-top:6px;">Vision</b><small style="color:#64748b;">Leading school in results & character in Tanzania.</small></div>
+</div>
+</div>
+<div style="background:linear-gradient(180deg,#f8fafc,white);padding:30px;border-radius:20px;border:1px solid #f1f5f9;">
+<h4 style="margin-bottom:14px;">Core Values</h4>
+<div style="display:flex;gap:10px;margin:10px 0;"><span style="background:var(--navy);color:var(--gold);width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-size:12px;">E</span><div><b>Excellence</b><p style="font-size:13px;color:#64748b;">High NECTA standards every year</p></div></div>
+<div style="display:flex;gap:10px;margin:10px 0;"><span style="background:var(--navy);color:var(--gold);width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-size:12px;">D</span><div><b>Discipline</b><p style="font-size:13px;color:#64748b;">Respect, order & time keeping</p></div></div>
+<div style="display:flex;gap:10px;margin:10px 0;"><span style="background:var(--navy);color:var(--gold);width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-size:12px;">I</span><div><b>Integrity</b><p style="font-size:13px;color:#64748b;">Honesty in exams & life</p></div></div>
+</div>
+</div>
 </div>
 
-<div id="programs" class="cards">
-  <div class="card"><i class="bi bi-book" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Quality Education</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">NECTA Baby to Form 6</p></div>
-  <div class="card"><i class="bi bi-people" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Smart Management</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Dashboard & Finance</p></div>
-  <div class="card"><i class="bi bi-award" style="font-size:38px; color:#2563eb;"></i><h4 style="margin-top:12px;">Experienced Teachers</h4><p style="font-size:13px; color:#64748b; margin-top:8px;">Qualified staff excellence</p></div>
+<div id="programs" class="section programs" style="max-width:100%;background:#f8fafc;">
+<div style="max-width:1300px;margin:auto;">
+<span class="badge">Our Programs</span>
+<h2 style="font-family:'Playfair Display';font-size:36px;margin:12px 0;color:var(--navy)">One Campus, Complete Education Journey</h2>
+<div class="grid3">
+<div class="program-card"><div class="top"></div><div class="body"><i class="bi bi-balloon"></i><h3>Baby & Middle Class</h3><p style="font-size:13px;color:#64748b;margin:8px 0 14px;">Play-based learning, early literacy, caring environment age 2-4.</p><small style="color:var(--blue);font-weight:700;">Age 2-5 • Day Care</small></div></div>
+<div class="program-card"><div class="top" style="background:var(--blue)"></div><div class="body"><i class="bi bi-book"></i><h3>Primary (1-7)</h3><p style="font-size:13px;color:#64748b;margin:8px 0 14px;">NECTA curriculum + English, Computer, Sports & Clubs.</p><small style="color:var(--blue);font-weight:700;">PSLE Focus • Boarding</small></div></div>
+<div class="program-card"><div class="top" style="background:#22c55e"></div><div class="body"><i class="bi bi-mortarboard"></i><h3>Secondary (Form 1-6)</h3><p style="font-size:13px;color:#64748b;margin:8px 0 14px;">Science, Arts, Commerce with lab & digital learning.</p><small style="color:var(--blue);font-weight:700;">CSEE & ACSEE • Lab</small></div></div>
+</div>
+</div>
 </div>
 
-<div id="teachers" style="padding:40px 20px; text-align:center; background:white;">
-  <h2 style="color:#0c152d;">Our Teachers</h2>
-  <p style="color:#64748b;">Dedicated team for academic excellence - Day & Boarding support</p>
+<div id="teachers" class="section" style="text-align:center;">
+<span class="badge">Our Team</span>
+<h2 style="font-family:'Playfair Display';font-size:34px;color:var(--navy);margin:12px 0;">Teachers Who Care Like Parents</h2>
+<p style="color:#64748b;max-width:600px;margin:10px auto 30px;">Qualified, NECTA-experienced, dedicated to each child's success - day & boarding support 24/7.</p>
+<div style="background:var(--navy);color:white;padding:30px;border-radius:20px;display:inline-flex;gap:40px;flex-wrap:wrap;justify-content:center;">
+<div><b style="color:var(--gold);font-size:24px;">32</b><br><small>Teachers</small></div><div><b style="color:var(--gold);font-size:24px;">15:1</b><br><small>Ratio</small></div><div><b style="color:var(--gold);font-size:24px;">100%</b><br><small>Qualified</small></div>
+</div>
 </div>
 
-<div id="apply" class="apply-wrap">
-  <div>
-    <h3 style="color:#0c152d;"><i class="bi bi-list-ol" style="color:#2563eb;"></i> How to Apply</h3>
-    <ol style="line-height:2.8; margin-top:15px; color:#334155;">
-      <li>Fill the form on this page</li>
-      <li>Pay Application Fee TZS 10,000</li>
-      <li>Bring Birth Certificate + 2 Photos</li>
-      <li>Entrance Interview</li>
-    </ol>
-  </div>
-  <div class="form-box">
-    <h4 style="color:#0c152d;">Apply Now - Admission 2026</h4>
-    <form method="post">{% csrf_token %}
-      <input type="text" name="full_name" placeholder="Student Full Name *" required>
-      <input type="text" name="parent_name" placeholder="Parent Name *" required>
-      <input type="text" name="parent_phone" placeholder="Parent Phone *" required>
-      <select name="class_applying" required><option value="">Class Applying *</option><option>Baby Class</option><option>Middle Class</option><option>Pre-Primary</option><option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option></select>
-      <input type="text" name="previous_school" placeholder="Previous School">
-      <textarea name="message" placeholder="Message" rows="3"></textarea>
-      <button type="submit">Submit Application</button>
-    </form>
-  </div>
+<div id="apply" class="section">
+<div class="apply">
+<div>
+<h2 style="font-family:'Playfair Display';font-size:38px;line-height:1.1">Secure Your Child's Spot for 2026</h2>
+<p style="color:#94a3b8;margin:16px 0 24px;line-height:1.6">Fill the form - our admissions team will call you within 2 hours. Limited slots for boarding.</p>
+<div style="background:rgba(255,255,255,.06);padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.1)">
+<div style="display:flex;gap:12px;margin:12px 0"><i class="bi bi-1-circle-fill" style="color:var(--gold)"></i><span><b>Fill Form</b> - 2 min online</span></div>
+<div style="display:flex;gap:12px;margin:12px 0"><i class="bi bi-2-circle-fill" style="color:var(--gold)"></i><span><b>Pay TZS 10,000</b> - Application fee</span></div>
+<div style="display:flex;gap:12px;margin:12px 0"><i class="bi bi-3-circle-fill" style="color:var(--gold)"></i><span><b>Bring Documents</b> - Birth cert + 2 photos</span></div>
+<div style="display:flex;gap:12px;margin:12px 0"><i class="bi bi-4-circle-fill" style="color:var(--gold)"></i><span><b>Interview</b> - Welcome to KILAMSA!</span></div>
+</div>
+</div>
+<div style="background:white;border-radius:16px;padding:26px;">
+<h4 style="color:var(--navy);margin-bottom:6px;">Admission Form 2026</h4><p style="color:#64748b;font-size:13px;margin-bottom:16px;">Response within 2 hours - 8am to 8pm</p>
+{% if messages %}{% for m in messages %}<div style="background:#dcfce7;color:#166534;padding:10px;border-radius:8px;margin-bottom:12px;font-size:13px;">{{ m }}</div>{% endfor %}{% endif %}
+<form method="post">{% csrf_token %}
+<input type="text" name="full_name" placeholder="Student Full Name *" required>
+<input type="text" name="parent_name" placeholder="Parent/Guardian Name *" required>
+<input type="text" name="parent_phone" placeholder="Parent Phone (e.g. 0712...)*" required>
+<select name="class_applying" required><option value="">Select Class *</option><option>Baby Class</option><option>Middle Class</option><option>Pre-Primary</option><option>Class 1</option><option>Class 2</option><option>Class 3</option><option>Class 4</option><option>Class 5</option><option>Class 6</option><option>Class 7</option><option>Form 1</option><option>Form 2</option><option>Form 3</option><option>Form 4</option><option>Form 5</option><option>Form 6</option></select>
+<input type="text" name="previous_school" placeholder="Previous School (if any)">
+<textarea name="message" rows="3" placeholder="Any message"></textarea>
+<button type="submit">Submit Application →</button>
+<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;">By submitting, you agree to our admission terms. We will call you.</p>
+</form>
+</div>
+</div>
 </div>
 
-<div style="background:#0c152d; color:#94a3b8; text-align:center; padding:20px; font-size:12px;">© 2026 KILAMSA. Mlimba - Morogoro. Odiztech</div>
-
-<script>
-const btn = document.getElementById('hamburgerBtn');
-const menu = document.getElementById('navMenu');
-btn.addEventListener('click', () => {
-  menu.classList.toggle('active');
-});
-document.querySelectorAll('#navMenu a').forEach(link=>{
-  link.addEventListener('click', ()=>{
-    menu.classList.remove('active');
-  });
-});
-</script>
+<div style="background:#081229;color:#94a3b8;text-align:center;padding:30px 20px;">
+<div style="color:white;font-weight:800;letter-spacing:2px;">KILAMSA SCHOOLS</div>
+<div style="margin:8px 0;font-size:13px;">Mlimba - Morogoro, Tanzania • NECTA Registered • Day & Boarding • Transport</div>
+<div style="font-size:11px;margin-top:12px;">© 2026 KILAMSA. Built by Odiztech • Excellence • Discipline • Integrity</div>
+</div>
 
 </body>
 </html>
