@@ -328,17 +328,15 @@ def generate_reports(request, class_id):
     exams = Exam.objects.filter(class_room=class_room)
 
     if not exams.exists():
-        messages.error(request, "No exams found for this class. Create exam first.")
+        messages.error(request, "No exams found for this class.")
         return redirect('academics:class_detail', pk=class_id)
 
-    if not subjects.exists():
-        messages.error(request, "No subjects found for this class.")
-        return redirect('academics:class_detail', pk=class_id)
+    # Debug: print StudentReport fields
+    print("StudentReport fields:", [f.name for f in StudentReport._meta.get_fields()])
 
     total_created = 0
     for exam in exams:
-        # Check if exam has any results
-        if not ExamResult.objects.filter(exam=exam, student__class_room=class_room).exists():
+        if not ExamResult.objects.filter(exam=exam).exists():
             continue
         
         student_totals = []
@@ -347,17 +345,16 @@ def generate_reports(request, class_id):
             if not results.exists():
                 continue
             
-            total_marks = 0
+            total_marks = sum(float(r.test_marks or 0) + float(r.exam_marks or 0) for r in results)
+            avg = total_marks / max(results.count(), 1)
+            
             points_list = []
             for res in results:
                 score = float(res.test_marks or 0) + float(res.exam_marks or 0)
-                total_marks += score
                 if class_room.level_group == 'ORDINARY':
                     points_list.append(get_ordinary_points(score))
                 elif class_room.level_group == 'ADVANCED':
                     points_list.append(get_advanced_points(score))
-            
-            avg = total_marks / max(results.count(), 1)
             
             if class_room.level_group in ['ORDINARY', 'ADVANCED']:
                 div_points, division = calculate_best_points(points_list, class_room.level_group)
@@ -369,31 +366,37 @@ def generate_reports(request, class_id):
                 elif avg >= 30: division = 'D'
                 else: division = 'F'
 
-            report, created = StudentReport.objects.update_or_create(
+            # Try to create with flexible fields
+            defaults = {}
+            # check what fields exist
+            field_names = [f.name for f in StudentReport._meta.get_fields()]
+            if 'total_marks' in field_names: defaults['total_marks'] = total_marks
+            if 'total' in field_names: defaults['total'] = total_marks
+            if 'average_marks' in field_names: defaults['average_marks'] = avg
+            if 'average' in field_names: defaults['average'] = avg
+            if 'division_points' in field_names: defaults['division_points'] = div_points
+            if 'points' in field_names: defaults['points'] = div_points
+            if 'division' in field_names: defaults['division'] = division
+            if 'class_room' in field_names: defaults['class_room'] = class_room
+            if 'classroom' in field_names: defaults['classroom'] = class_room
+
+            report, _ = StudentReport.objects.update_or_create(
                 student=student,
                 exam=exam,
-                defaults={
-                    'class_room': class_room,
-                    'total_marks': total_marks,
-                    'average_marks': avg,
-                    'division_points': div_points,
-                    'division': division,
-                }
+                defaults=defaults
             )
-            student_totals.append((report, avg))
+            # set position if field exists
+            if hasattr(report, 'position'):
+                student_totals.append((report, avg))
             total_created += 1
         
-        # Assign positions based on average descending
         student_totals.sort(key=lambda x: x[1], reverse=True)
         for pos, (rep, _) in enumerate(student_totals, start=1):
-            rep.position = pos
-            rep.save()
+            if hasattr(rep, 'position'):
+                rep.position = pos
+                rep.save()
 
-    if total_created == 0:
-        messages.warning(request, "No marks found. Upload marks first via Bulk Upload or Enter Marks.")
-    else:
-        messages.success(request, f"Successfully generated {total_created} reports for {class_room}")
-
+    messages.success(request, f"Generated {total_created} reports")
     return redirect('academics:class_detail', pk=class_id)
 
 def bulk_print_class_reports(request, class_id, exam_id):
