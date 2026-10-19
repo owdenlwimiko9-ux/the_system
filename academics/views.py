@@ -105,7 +105,6 @@ def class_update(request, pk):
         return redirect('academics:class_list')
     return render(request, "academics/class_form.html", {'form': form, 'title': 'Edit Class'})
 
-# ===== FIXED: class_dashboard & class_overview & class_detail ALL USE SAME LOGIC =====
 def class_detail(request, pk):
     class_room = get_object_or_404(ClassRoom, id=pk)
     students = Student.objects.filter(class_room=class_room, is_active=True).order_by('first_name')
@@ -114,13 +113,13 @@ def class_detail(request, pk):
     teachers = Teacher.objects.filter(subjects__in=subjects).distinct() if subjects.exists() else Teacher.objects.none()
     exams = Exam.objects.filter(class_room=class_room).select_related('term').order_by('term__start_date', 'id', 'name')
     
-    # Build term_exams dict exactly as your template expects
     term_exams = {}
     for exam in exams:
         term_label = exam.term.name if exam.term else "General"
         if term_label not in term_exams:
             term_exams[term_label] = []
-        reports = StudentReport.objects.filter(exam=exam, class_room=class_room).select_related('student').order_by('position')
+        # FIXED: order by class_position, not position
+        reports = StudentReport.objects.filter(exam=exam, student__class_room=class_room).select_related('student').order_by('class_position')
         term_exams[term_label].append({
             'exam': exam,
             'reports': reports
@@ -248,7 +247,7 @@ def teacher_update(request, pk):
 def teacher_dashboard(request):
     teacher = Teacher.objects.filter(email=request.user.email).first()
     if not teacher: return render(request, 'academics/no_teacher_profile.html')
-    return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_subjects': Subject.objects.filter(teacher=teacher), 'active_exams': Exam.objects.filter(is_active=True) if hasattr(Exam, 'is_active') else Exam.objects.all()})
+    return render(request, 'academics/teacher_dashboard.html', {'teacher': teacher, 'my_subjects': Subject.objects.filter(teacher=teacher), 'active_exams': Exam.objects.filter(is_active=True)})
 
 def assign_subject_to_teacher(request, pk):
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -295,7 +294,6 @@ def bulk_upload_results(request, exam_id):
             student = Student.objects.filter(admission_number=row[0], class_room=exam.class_room, is_active=True).first()
             if not student: continue
             col=2
-            # Don't delete here, update_or_create below
             for subj in subjects:
                 try:
                     t = float(row[col]) if row[col] not in [None,''] else 0
@@ -318,85 +316,77 @@ def report_detail(request, pk):
 
 def report_list(request, pk):
     class_room = get_object_or_404(ClassRoom, pk=pk)
-    return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': StudentReport.objects.filter(class_room=class_room).order_by('student__first_name')})
+    return render(request, "academics/report_list.html", {'class_room': class_room, 'reports': StudentReport.objects.filter(student__class_room=class_room).order_by('class_position')})
 
-# ===== FIXED: generate_reports NOW ACTUALLY CREATES REPORTS =====
 def generate_reports(request, class_id):
     class_room = get_object_or_404(ClassRoom, id=class_id)
     students = Student.objects.filter(class_room=class_room, is_active=True)
     subjects = Subject.objects.filter(class_room=class_room)
     exams = Exam.objects.filter(class_room=class_room)
+    academic_year = AcademicYear.objects.filter(is_active=True).first()
 
     if not exams.exists():
         messages.error(request, "No exams found for this class.")
         return redirect('academics:class_detail', pk=class_id)
 
-    # Debug: print StudentReport fields
-    print("StudentReport fields:", [f.name for f in StudentReport._meta.get_fields()])
-
     total_created = 0
     for exam in exams:
-        if not ExamResult.objects.filter(exam=exam).exists():
+        if not ExamResult.objects.filter(exam=exam, student__class_room=class_room).exists():
             continue
         
-        student_totals = []
         for student in students:
             results = ExamResult.objects.filter(student=student, exam=exam)
             if not results.exists():
                 continue
             
-            total_marks = sum(float(r.test_marks or 0) + float(r.exam_marks or 0) for r in results)
-            avg = total_marks / max(results.count(), 1)
+            # Create report - total_marks and average will be calculated automatically in model save()
+            report, created = StudentReport.objects.get_or_create(
+                student=student,
+                exam=exam,
+                defaults={'academic_year': academic_year}
+            )
+            # Force recalculation
+            report.academic_year = academic_year
+            report.save()
             
+            # Now calculate division based on results
             points_list = []
             for res in results:
-                score = float(res.test_marks or 0) + float(res.exam_marks or 0)
+                # average_marks in ExamResult is (test+exam)/2, use total for division
+                score = float(res.total_marks or 0)
+                # Your total_marks is test+exam, so for grading we use average or total?
+                # Using total as score is 0-100 if test+exam =100. Adjust if needed.
+                # Here we use average_marks which is 0-100
+                score_for_grade = float(res.average_marks or 0)
                 if class_room.level_group == 'ORDINARY':
-                    points_list.append(get_ordinary_points(score))
+                    points_list.append(get_ordinary_points(score_for_grade))
                 elif class_room.level_group == 'ADVANCED':
-                    points_list.append(get_advanced_points(score))
+                    points_list.append(get_advanced_points(score_for_grade))
             
             if class_room.level_group in ['ORDINARY', 'ADVANCED']:
                 div_points, division = calculate_best_points(points_list, class_room.level_group)
             else:
                 div_points = 0
+                avg = float(report.average_marks or 0)
                 if avg >= 75: division = 'A'
                 elif avg >= 65: division = 'B'
                 elif avg >= 45: division = 'C'
                 elif avg >= 30: division = 'D'
                 else: division = 'F'
 
-            # Try to create with flexible fields
-            defaults = {}
-            # check what fields exist
-            field_names = [f.name for f in StudentReport._meta.get_fields()]
-            if 'total_marks' in field_names: defaults['total_marks'] = total_marks
-            if 'total' in field_names: defaults['total'] = total_marks
-            if 'average_marks' in field_names: defaults['average_marks'] = avg
-            if 'average' in field_names: defaults['average'] = avg
-            if 'division_points' in field_names: defaults['division_points'] = div_points
-            if 'points' in field_names: defaults['points'] = div_points
-            if 'division' in field_names: defaults['division'] = division
-            if 'class_room' in field_names: defaults['class_room'] = class_room
-            if 'classroom' in field_names: defaults['classroom'] = class_room
-
-            report, _ = StudentReport.objects.update_or_create(
-                student=student,
-                exam=exam,
-                defaults=defaults
+            # Update division fields without triggering full save loop
+            StudentReport.objects.filter(id=report.id).update(
+                division_points=div_points,
+                division=division,
+                total_points=div_points
             )
-            # set position if field exists
-            if hasattr(report, 'position'):
-                student_totals.append((report, avg))
             total_created += 1
-        
-        student_totals.sort(key=lambda x: x[1], reverse=True)
-        for pos, (rep, _) in enumerate(student_totals, start=1):
-            if hasattr(rep, 'position'):
-                rep.position = pos
-                rep.save()
 
-    messages.success(request, f"Generated {total_created} reports")
+    if total_created == 0:
+        messages.warning(request, "No marks found. Upload marks first.")
+    else:
+        messages.success(request, f"Generated {total_created} reports for {class_room}")
+
     return redirect('academics:class_detail', pk=class_id)
 
 def bulk_print_class_reports(request, class_id, exam_id):
@@ -410,7 +400,6 @@ def report_pdf(request, pk):
     return redirect('academics:report_detail', pk=pk)
 
 def send_results_to_parents(request, class_id, term_number):
-    # TODO: Implement WhatsApp sending
     messages.info(request, f"Send to parents for term {term_number} - Coming soon")
     return redirect('academics:class_detail', pk=class_id)
 
@@ -435,6 +424,5 @@ def enter_marks(request, class_pk, exam_pk):
                 ExamResult.objects.update_or_create(student=st, exam=exam, subject=subj, defaults={'test_marks': t, 'exam_marks': e})
         messages.success(request, "Marks saved successfully")
         return redirect('academics:class_detail', pk=class_pk)
-    # preload existing marks
     existing = {(r.student_id, r.subject_id): r for r in ExamResult.objects.filter(exam=exam)}
     return render(request, 'academics/enter_marks.html', {'class_room': class_room, 'exam': exam, 'students': students, 'subjects': subjects, 'existing': existing})
